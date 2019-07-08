@@ -1,0 +1,165 @@
+crunch_nback_subject <- function(subject_path)
+{
+  library(readxl)
+  library(stringi)
+  library(lattice)
+  library(ggplot2)
+  library(rprime)
+
+  # # Trying rprime package for eprime txt output, but not working out so far..
+
+  #eprime_data = read_eprime('SpatialN_Real_nofMRI_Cumulative_Scanner-2-1.txt', remove_clock = TRUE)
+  #data = stri_read_lines('SpatialN_Real_nofMRI_Cumulative_Scanner-2-1.txt')
+  #data = to_data_frame(eprime_data)
+
+
+  # set path info
+  # TO DO: consider adding subject argument to shell script to run this r script
+
+  #  -----------------------------------------------------------------------------------------------
+
+  # # LOAD DATA # #
+  # for now convert eprime dataaid to .xlsx
+
+  # TO DO: what to do for multiple subjects?
+  # 1) export subject figures to "Figures/Subject" with file name "Datatype_SubjectID"
+  # 2) make a new script that grabs subject data (based on argument) and produces group level results file
+  # 3) this script will create and export figures to "Figures/Group" with file name ""
+  # 4) clean up code
+  # a) create single data frame for accuracy and response time(calulate percent correct from dataframe..??)
+  # b)
+
+  nback_data1 = read_excel(file.path(subject_path,"Raw/Nback/nback_results.xlsx"), range = "BL2:BP450", sheet = 1, col_types = "text")
+  nback_data2 = read_excel(file.path(subject_path,"Raw/Nback/nback_results.xlsx"), range = "GE2:GP450", sheet = 1, col_types = "text")
+  nback_data3 = read_excel(file.path(subject_path,"Raw/Nback/nback_results.xlsx"), range = "DX2:DX450", sheet = 1, col_types = "text")
+
+  interstimulus_interval = nback_data1$ISI
+
+  expected_correct_response = nback_data2$Stimulus.CRESP
+  subject_response = nback_data2$Stimulus.RESP
+  subject_response_onset = nback_data2$Stimulus.RT
+
+  nback_block_labels = nback_data3$`Running[SubTrial]`
+  nback_level = stri_sub(nback_block_labels, -1,-1)
+  nback_level = as.numeric(nback_level)
+
+
+  #  -----------------------------------------------------------------------------------------------
+
+  # # ORGANIZE # #
+
+  # remove indices where mr triggered
+  indices_to_remove = which(subject_response == 5)
+  subject_response_onset[indices_to_remove] = 0
+  subject_response_onset[subject_response_onset == 0] = NA
+  subject_response_onset = as.numeric(subject_response_onset)
+
+  # TO DO: check for blocks where subject did not responsd (i.e. forgot which n-back they were performing)
+
+  # # subject response accuracy # #
+  # produces a logical array indicating whether the subject responed when expected, or not
+  # TO DO: what to do if subject responded when a response was NOT expected ... for now ignoring erroneous repsonses.. only interested in respond to expected or not
+  subject_accuracy_r = expected_correct_response == subject_response
+
+  # convert accuracy into percent ... is there a simpler method?
+  accuracy_na_indices_removed = which(!is.na(subject_accuracy_r))
+  Accuracy_dataframe_noNA = data.frame(nback_level[accuracy_na_indices_removed], subject_accuracy_r[accuracy_na_indices_removed], interstimulus_interval[accuracy_na_indices_removed])
+
+  zero_back_short_indices = which(Accuracy_dataframe_noNA$interstimulus_interval==500 & Accuracy_dataframe_noNA$nback_level == 0)
+  one_back_short_indices = which(Accuracy_dataframe_noNA$interstimulus_interval==500 & Accuracy_dataframe_noNA$nback_level == 1)
+  two_back_short_indices = which(Accuracy_dataframe_noNA$interstimulus_interval==500 & Accuracy_dataframe_noNA$nback_level == 2)
+  three_back_short_indices = which(Accuracy_dataframe_noNA$interstimulus_interval==500 & Accuracy_dataframe_noNA$nback_level == 3)
+
+  zero_back_long_indices = which(Accuracy_dataframe_noNA$interstimulus_interval==1500 & Accuracy_dataframe_noNA$nback_level == 0)
+  one_back_long_indices = which(Accuracy_dataframe_noNA$interstimulus_interval==1500 & Accuracy_dataframe_noNA$nback_level == 1)
+  two_back_long_indices = which(Accuracy_dataframe_noNA$interstimulus_interval==1500 & Accuracy_dataframe_noNA$nback_level == 2)
+  three_back_long_indices = which(Accuracy_dataframe_noNA$interstimulus_interval==1500 & Accuracy_dataframe_noNA$nback_level == 3)
+
+  zero_back_short_accuracy = Accuracy_dataframe_noNA$subject_accuracy_r[zero_back_short_indices]
+  one_back_short_accuracy = Accuracy_dataframe_noNA$subject_accuracy_r[one_back_short_indices]
+  two_back_short_accuracy = Accuracy_dataframe_noNA$subject_accuracy_r[two_back_short_indices]
+  three_back_short_accuracy = Accuracy_dataframe_noNA$subject_accuracy_r[three_back_short_indices]
+
+  zero_back_long_accuracy = Accuracy_dataframe_noNA$subject_accuracy_r[zero_back_long_indices]
+  one_back_long_accuracy = Accuracy_dataframe_noNA$subject_accuracy_r[one_back_long_indices]
+  two_back_long_accuracy = Accuracy_dataframe_noNA$subject_accuracy_r[two_back_long_indices]
+  three_back_long_accuracy = Accuracy_dataframe_noNA$subject_accuracy_r[three_back_long_indices]
+
+  zero_back_short_accuracy_percent = sum(zero_back_short_accuracy) / length (zero_back_short_accuracy) * 100
+  one_back_short_accuracy_percent = sum(one_back_short_accuracy) / length (one_back_short_accuracy) * 100
+  two_back_short_accuracy_percent = sum(two_back_short_accuracy) / length (two_back_short_accuracy) * 100
+  three_back_short_accuracy_percent = sum(three_back_short_accuracy) / length (three_back_short_accuracy) * 100
+
+  zero_back_long_accuracy_percent = sum(zero_back_long_accuracy) / length (zero_back_long_accuracy) * 100
+  one_back_long_accuracy_percent = sum(one_back_long_accuracy) / length (one_back_long_accuracy) * 100
+  two_back_long_accuracy_percent = sum(two_back_long_accuracy) / length (two_back_long_accuracy) * 100
+  three_back_long_accuracy_percent = sum(three_back_long_accuracy) / length (three_back_long_accuracy) * 100
+
+  subject_long_percents = data.frame(nback = c(as.character(0:3)), subject_accuracy = c(as.numeric(zero_back_long_accuracy_percent),
+                                                                                        as.numeric(two_back_long_accuracy_percent), as.numeric(two_back_long_accuracy_percent), as.numeric(three_back_long_accuracy_percent)),
+                                     ISI = c("long", "long", "long", "long"))
+
+  subject_short_percents = data.frame(nback = c(as.character(0:3)), subject_accuracy = c(as.numeric(zero_back_short_accuracy_percent),
+                                                                                         as.numeric(two_back_short_accuracy_percent), as.numeric(two_back_short_accuracy_percent), as.numeric(three_back_short_accuracy_percent)),
+                                      ISI = c("short", "short", "short", "short"))
+
+  accuracy_dataframe_complete = rbind(subject_long_percents,subject_short_percents)
+
+
+  # # response time by nback # #
+  # grab
+  subject_accuracy_r_numeric = as.numeric(subject_accuracy_r)
+  response_correct_indices = which(subject_accuracy_r_numeric == 1)
+
+  nback_level_correct = nback_level[response_correct_indices]
+  subject_response_onset_correct = subject_response_onset[response_correct_indices]
+  interstimulus_interval_correct = interstimulus_interval[response_correct_indices]
+
+  responsetime_dataframe = data.frame(nback_level_correct, subject_response_onset_correct, interstimulus_interval_correct)
+
+  #  -----------------------------------------------------------------------------------------------
+
+  # # Store Data in Processed folder # #
+  write.csv(responsetime_dataframe, file = file.path(subject_path,"Processed/Nback_files/responsetime_CrunchPilot01_Male_28.csv"))
+  write.csv(accuracy_dataframe_complete, file = file.path(subject_path,"Processed/Nback_files/accuracy_CrunchPilot01_Male_28.csv"))
+
+  #  -----------------------------------------------------------------------------------------------
+
+  # # PLOT # #
+
+  accuracy_file_name_pdf = "Accuracy_CrunchPilot01_Male_28.pdf"
+  file = file.path(subject_path,"Figures/Subject",accuracy_file_name_pdf)
+  accuracy_fig = ggplot(data=accuracy_dataframe_complete, aes(fill = ISI, x = nback, y=subject_accuracy)) + geom_bar(position = "dodge", stat = "identity")
+  accuracy_fig + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+                       panel.background = element_blank(), axis.line = element_line(colour = "black")) + ggtitle("Subject Accuracy for N-Back Levels and ISI") + xlab("N-Back Level") + ylab("Percent Correct (%)") +
+    scale_fill_manual(values=c("orange","blue"))
+  ggsave(file)
+
+  accuracy_file_name_jpeg = "Accuracy_CrunchPilot01_Male_28.jpeg"
+  file = file.path(subject_path,"Figures/Subject",accuracy_file_name_jpeg)
+  accuracy_fig = ggplot(data=accuracy_dataframe_complete, aes(fill = ISI, x = nback, y=subject_accuracy)) + geom_bar(position = "dodge", stat = "identity")
+  accuracy_fig + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+                       panel.background = element_blank(), axis.line = element_line(colour = "black")) + ggtitle("Subject Accuracy for N-Back Levels and ISI") + xlab("N-Back Level") + ylab("Percent Correct (%)") +
+    scale_fill_manual(values=c("orange","blue"))
+  ggsave(file)
+
+
+
+  responsetime_file_name_pdf = "ResponseTime_CrunchPilot01_Male_28.pdf"
+  file = file.path(subject_path,"Figures/Subject",responsetime_file_name_pdf)
+  ggplot(data = responsetime_dataframe, aes(fill = interstimulus_interval_correct, x = factor(nback_level_correct), y = subject_response_onset_correct)) + geom_violin(position = position_dodge(1)) +
+    theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+    scale_fill_manual(values=c("orange","blue"))  + ggtitle("Subject Reaction Time for N-Back Levels and ISI") + xlab("N-Back Level") + ylab("Onset Time (ms)")
+  ggsave(file)
+
+  responsetime_file_name_jpeg = "ResponseTime_CrunchPilot01_Male_28.jpeg"
+  file = file.path(subject_path,"Figures/Subject",responsetime_file_name_jpeg)
+  ggplot(data = responsetime_dataframe, aes(fill = interstimulus_interval_correct, x = factor(nback_level_correct), y = subject_response_onset_correct)) + geom_violin(position = position_dodge(1)) +
+    theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+    scale_fill_manual(values=c("orange","blue"))  + ggtitle("Subject Reaction Time for N-Back Levels and ISI") + xlab("N-Back Level") + ylab("Onset Time (ms)")
+  ggsave(file)
+
+  #  -----------------------------------------------------------------------------------------------
+
+}
+
