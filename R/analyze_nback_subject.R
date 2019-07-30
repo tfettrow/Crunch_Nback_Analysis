@@ -1,4 +1,4 @@
-crunch_nback_subject <- function(subject_path)
+analyze_nback_subject <- function(subject_path)
 {
   library(readxl)
   library(stringi)

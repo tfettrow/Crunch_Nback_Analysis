@@ -1,14 +1,14 @@
-\name{crunch_nback_subject}
-\alias{crunch_nback_subject}
+\name{analyze_nback_subject}
+\alias{analyze_nback_subject}
 %- Also NEED an '\alias' for EACH other topic documented here.
-\title{crunch_nback_subject
+\title{analyze_nback_subject
 %%  ~~function to do ... ~~
 }
 \description{
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
 }
 \usage{
-crunch_nback_subject(subject_path)
+analyze_nback_subject(subject_path)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
