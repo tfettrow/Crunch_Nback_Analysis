@@ -35,7 +35,6 @@ analyze_nback_subject <- function(subject_path)
   nback_data2 = read_excel(file.path(subject_path,"Raw/Nback_files/nback_results.xlsx"), range = "GE2:GP450", sheet = 1, col_types = "text")
   nback_data3 = read_excel(file.path(subject_path,"Raw/Nback_files/nback_results.xlsx"), range = "DX2:DX450", sheet = 1, col_types = "text")
 
-
   #nback_data1 = read_excel(file.path(subject_path,"Raw/Nback_files/nback_results.xlsx"), range = "EC2:EC450", sheet = 1, col_types = "text")
   #nback_data2 = read_excel(file.path(subject_path,"Raw/Nback_files/nback_results.xlsx"), range = "IT2:JC450", sheet = 1, col_types = "text")
   #nback_data3 = read_excel(file.path(subject_path,"Raw/Nback_files/nback_results.xlsx"), range = "GK2:GK450", sheet = 1, col_types = "text")
@@ -57,11 +56,19 @@ analyze_nback_subject <- function(subject_path)
 
   # # ORGANIZE # #
 
-  condition_onset_info_dataframe = data.frame(stimulus_onset_times, subject_response_onset)
+  # determine the onset time of each condition
+  unique_subtrials = unique(nback_block_labels)
+  condition_onset_times <- vector()
+  for (this_condition in unique_subtrials){
+    this_condition_first_stim_index = min(which(nback_block_labels == this_condition))
+    this_condition_onset_time = stimulus_onset_times[this_condition_first_stim_index]
+    condition_onset_times = append(condition_onset_times, this_condition_onset_time)
+  }
+  condition_onset_info_dataframe = data.frame(condition_onset_times, unique_subtrials)
 
 
   # remove indices where mr triggered
-  # TO DO: remove this for new subjects
+  # TO DO: remove this for new subjects (taken care of in new eprime program)
   indices_to_remove = which(subject_response == 5)
   subject_response_onset[indices_to_remove] = 0
   subject_response_onset[subject_response_onset == 0] = NA
