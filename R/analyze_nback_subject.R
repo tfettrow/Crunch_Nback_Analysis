@@ -6,7 +6,6 @@ analyze_nback_subject <- function(subject_path)
   library(ggplot2)
   library(rprime)
 
-  # yo i changed this
 
   # # Trying rprime package for eprime txt output, but not working out so far..
 
@@ -17,6 +16,7 @@ analyze_nback_subject <- function(subject_path)
 
   # set path info
   # TO DO: consider adding subject argument to shell script to run this r script
+
 
   #  -----------------------------------------------------------------------------------------------
 
@@ -35,11 +35,14 @@ analyze_nback_subject <- function(subject_path)
   nback_data2 = read_excel(file.path(subject_path,"Raw/Nback_files/nback_results.xlsx"), range = "GE2:GP450", sheet = 1, col_types = "text")
   nback_data3 = read_excel(file.path(subject_path,"Raw/Nback_files/nback_results.xlsx"), range = "DX2:DX450", sheet = 1, col_types = "text")
 
+
   #nback_data1 = read_excel(file.path(subject_path,"Raw/Nback_files/nback_results.xlsx"), range = "EC2:EC450", sheet = 1, col_types = "text")
   #nback_data2 = read_excel(file.path(subject_path,"Raw/Nback_files/nback_results.xlsx"), range = "IT2:JC450", sheet = 1, col_types = "text")
   #nback_data3 = read_excel(file.path(subject_path,"Raw/Nback_files/nback_results.xlsx"), range = "GK2:GK450", sheet = 1, col_types = "text")
 
   interstimulus_interval = nback_data1$ISI
+
+  stimulus_onset_times = nback_data2$Stimulus.OnsetTime
 
   expected_correct_response = nback_data2$Stimulus.CRESP
   subject_response = nback_data2$Stimulus.RESP
@@ -54,7 +57,11 @@ analyze_nback_subject <- function(subject_path)
 
   # # ORGANIZE # #
 
+  condition_onset_info_dataframe = data.frame(stimulus_onset_times, subject_response_onset)
+
+
   # remove indices where mr triggered
+  # TO DO: remove this for new subjects
   indices_to_remove = which(subject_response == 5)
   subject_response_onset[indices_to_remove] = 0
   subject_response_onset[subject_response_onset == 0] = NA
@@ -125,17 +132,19 @@ analyze_nback_subject <- function(subject_path)
 
   #  -----------------------------------------------------------------------------------------------
 
+
   # TO DO: automate the Subject ID in file names
 
   # # Store Data in Processed folder # #
-  write.csv(responsetime_dataframe, file = file.path(subject_path,"Processed/Nback_files/responsetime_CrunchPilot01_Male_28.csv"))
-  write.csv(accuracy_dataframe_complete, file = file.path(subject_path,"Processed/Nback_files/accuracy_CrunchPilot01_Male_28.csv"))
+  write.csv(responsetime_dataframe, file = file.path(subject_path,"Processed/Nback_files/responsetime_CrunchPilot01.csv"))
+  write.csv(accuracy_dataframe_complete, file = file.path(subject_path,"Processed/Nback_files/accuracy_CrunchPilot01.csv"))
+  write.csv(condition_onset_info_dataframe, file = filepath(subject_path, "Processed/Nback_files/accuracy_CrunchPilot01.csv"))
 
   #  -----------------------------------------------------------------------------------------------
 
   # # PLOT # #
 
-  accuracy_file_name_pdf = "Accuracy_CrunchPilot01_Male_28.pdf"
+  accuracy_file_name_pdf = "Accuracy_CrunchPilot01.pdf"
   file = file.path(subject_path,"Figures",accuracy_file_name_pdf)
   accuracy_fig = ggplot(data=accuracy_dataframe_complete, aes(fill = ISI, x = nback, y=subject_accuracy)) + geom_bar(position = "dodge", stat = "identity")
   accuracy_fig + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
@@ -143,7 +152,7 @@ analyze_nback_subject <- function(subject_path)
     scale_fill_manual(values=c("orange","blue"))
   ggsave(file)
 
-  accuracy_file_name_jpeg = "Accuracy_CrunchPilot01_Male_28.jpeg"
+  accuracy_file_name_jpeg = "Accuracy_CrunchPilot01.jpeg"
   file = file.path(subject_path,"Figures",accuracy_file_name_jpeg)
   accuracy_fig = ggplot(data=accuracy_dataframe_complete, aes(fill = ISI, x = nback, y=subject_accuracy)) + geom_bar(position = "dodge", stat = "identity")
   accuracy_fig + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
@@ -153,18 +162,18 @@ analyze_nback_subject <- function(subject_path)
 
 
 
-  responsetime_file_name_pdf = "ResponseTime_CrunchPilot01_Male_28.pdf"
+  responsetime_file_name_pdf = "ResponseTime_CrunchPilot01.pdf"
   file = file.path(subject_path,"Figures",responsetime_file_name_pdf)
   ggplot(data = responsetime_dataframe, aes(fill = interstimulus_interval_correct, x = factor(nback_level_correct), y = subject_response_onset_correct)) + geom_violin(position = position_dodge(1)) +
     theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black")) +
     scale_fill_manual(values=c("orange","blue"))  + ggtitle("Subject Reaction Time for N-Back Levels and ISI") + xlab("N-Back Level") + ylab("Onset Time (ms)")
   ggsave(file)
 
-  responsetime_file_name_jpeg = "ResponseTime_CrunchPilot01_Male_28.jpeg"
+  responsetime_file_name_jpeg = "ResponseTime_CrunchPilot01.jpeg"
   file = file.path(subject_path,"Figures",responsetime_file_name_jpeg)
   ggplot(data = responsetime_dataframe, aes(fill = interstimulus_interval_correct, x = factor(nback_level_correct), y = subject_response_onset_correct)) + geom_violin(position = position_dodge(1)) +
     theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black")) +
-    scale_fill_manual(values=c("orange","blrachaelseidler/share/FromExternal/Research_Projects_UF/CRUNCH/Pilot_Study_Data/CrunchPilot01ue"))  + ggtitle("Subject Reaction Time for N-Back Levels and ISI") + xlab("N-Back Level") + ylab("Onset Time (ms)")
+    scale_fill_manual(values=c("orange","blue"))  + ggtitle("Subject Reaction Time for N-Back Levels and ISI") + xlab("N-Back Level") + ylab("Onset Time (ms)")
   ggsave(file)
 
   #  -----------------------------------------------------------------------------------------------
