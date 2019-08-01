@@ -34,6 +34,7 @@ analyze_nback_subject <- function(subject_path)
   nback_data1 = read_excel(file.path(subject_path,"Raw/Nback_files/nback_results.xlsx"), range = "BL2:BP450", sheet = 1, col_types = "text")
   nback_data2 = read_excel(file.path(subject_path,"Raw/Nback_files/nback_results.xlsx"), range = "GE2:GP450", sheet = 1, col_types = "text")
   nback_data3 = read_excel(file.path(subject_path,"Raw/Nback_files/nback_results.xlsx"), range = "DX2:DX450", sheet = 1, col_types = "text")
+  nback_data2 = read_excel(file.path(subject_path,"Raw/Nback_files/nback_results.xlsx"), range = "GE2:GP450", sheet = 1, col_types = "text")
 
 
   #nback_data1 = read_excel(file.path(subject_path,"Raw/Nback_files/nback_results.xlsx"), range = "EC2:EC450", sheet = 1, col_types = "text")
