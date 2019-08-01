@@ -6,12 +6,11 @@ analyze_nback_subject <- function(subject_path)
   library(ggplot2)
   library(rprime)
 
-
   # # Trying rprime package for eprime txt output, but not working out so far..
 
-  #eprime_data = read_eprime('SpatialN_Real_nofMRI_Cumulative_Scanner-2-1.txt', remove_clock = TRUE)
-  #data = stri_read_lines('SpatialN_Real_nofMRI_Cumulative_Scanner-2-1.txt')
-  #data = to_data_frame(eprime_data)
+  # eprime_data = read_eprime('SpatialN_Real_nofMRI_Cumulative_Scanner-2-1.txt', remove_clock = TRUE)
+  # data = stri_read_lines('SpatialN_Real_nofMRI_Cumulative_Scanner-2-1.txt')
+  # data = to_data_frame(eprime_data)
 
 
   # set path info
@@ -127,7 +126,6 @@ analyze_nback_subject <- function(subject_path)
 
 
   # # response time by nback # #
-  # grab
   subject_accuracy_r_numeric = as.numeric(subject_accuracy_r)
   response_correct_indices = which(subject_accuracy_r_numeric == 1)
 
@@ -139,19 +137,21 @@ analyze_nback_subject <- function(subject_path)
 
   #  -----------------------------------------------------------------------------------------------
 
-
-  # TO DO: automate the Subject ID in file names
+  # some funny stuff to be able to grab the subject ID for file naming
+  subject_path_string_split = strsplit(subject_path,"/")[1][1]
+  subject_id = vapply(subject_path_string_split, tail, "", 1)
 
   # # Store Data in Processed folder # #
-  write.csv(responsetime_dataframe, file = file.path(subject_path,"Processed/Nback_files/responsetime_CrunchPilot01.csv"))
-  write.csv(accuracy_dataframe_complete, file = file.path(subject_path,"Processed/Nback_files/accuracy_CrunchPilot01.csv"))
-  write.csv(condition_onset_info_dataframe, file = filepath(subject_path, "Processed/Nback_files/accuracy_CrunchPilot01.csv"))
+  write.csv(responsetime_dataframe, file = file.path(subject_path, paste0("Processed/Nback_files/responseTime_", toString(subject_id))))
+  write.csv(accuracy_dataframe_complete, file = file.path(subject_path, paste0("Processed/Nback_files/responseTime_", toString(subject_id))))
+  write.csv(condition_onset_info_dataframe, file = file.path(subject_path, paste0("Processed/Nback_files/responseTime_", toString(subject_id))))
 
   #  -----------------------------------------------------------------------------------------------
 
   # # PLOT # #
+  # TO DO: what to do when only one response time (not engough to create violin plot)?
 
-  accuracy_file_name_pdf = "Accuracy_CrunchPilot01.pdf"
+  accuracy_file_name_pdf = paste0("Accuracy_",toString(subject_id),".pdf")
   file = file.path(subject_path,"Figures",accuracy_file_name_pdf)
   accuracy_fig = ggplot(data=accuracy_dataframe_complete, aes(fill = ISI, x = nback, y=subject_accuracy)) + geom_bar(position = "dodge", stat = "identity")
   accuracy_fig + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
@@ -159,7 +159,7 @@ analyze_nback_subject <- function(subject_path)
     scale_fill_manual(values=c("orange","blue"))
   ggsave(file)
 
-  accuracy_file_name_jpeg = "Accuracy_CrunchPilot01.jpeg"
+  accuracy_file_name_jpeg = paste0("Accuracy_",toString(subject_id),".jpeg")
   file = file.path(subject_path,"Figures",accuracy_file_name_jpeg)
   accuracy_fig = ggplot(data=accuracy_dataframe_complete, aes(fill = ISI, x = nback, y=subject_accuracy)) + geom_bar(position = "dodge", stat = "identity")
   accuracy_fig + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
@@ -169,14 +169,14 @@ analyze_nback_subject <- function(subject_path)
 
 
 
-  responsetime_file_name_pdf = "ResponseTime_CrunchPilot01.pdf"
+  responsetime_file_name_pdf = paste0("ResponseTime_",toString(subject_id),".pdf")
   file = file.path(subject_path,"Figures",responsetime_file_name_pdf)
-  ggplot(data = responsetime_dataframe, aes(fill = interstimulus_interval_correct, x = factor(nback_level_correct), y = subject_response_onset_correct)) + geom_violin(position = position_dodge(1)) +
-    theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  ggplot(data = responsetime_dataframe, aes(fill = interstimulus_interval_correct, x = factor(nback_level_correct), y = subject_response_onset_correct)) + geom_violin(position = position_dodge(1))
+  + geom_point(position = position_dodge(1)) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black")) +
     scale_fill_manual(values=c("orange","blue"))  + ggtitle("Subject Reaction Time for N-Back Levels and ISI") + xlab("N-Back Level") + ylab("Onset Time (ms)")
   ggsave(file)
 
-  responsetime_file_name_jpeg = "ResponseTime_CrunchPilot01.jpeg"
+  responsetime_file_name_jpeg = paste0("ResponseTime_",toString(subject_id),".jpeg")
   file = file.path(subject_path,"Figures",responsetime_file_name_jpeg)
   ggplot(data = responsetime_dataframe, aes(fill = interstimulus_interval_correct, x = factor(nback_level_correct), y = subject_response_onset_correct)) + geom_violin(position = position_dodge(1)) +
     theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black")) +
