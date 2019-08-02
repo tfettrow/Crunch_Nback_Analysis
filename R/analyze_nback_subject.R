@@ -33,10 +33,6 @@ analyze_nback_subject <- function(subject_path)
   nback_data1 = read_excel(file.path(subject_path,"Raw/Nback_files/nback_results.xlsx"), range = "BL2:BP450", sheet = 1, col_types = "text")
   nback_data2 = read_excel(file.path(subject_path,"Raw/Nback_files/nback_results.xlsx"), range = "GE2:GP450", sheet = 1, col_types = "text")
   nback_data3 = read_excel(file.path(subject_path,"Raw/Nback_files/nback_results.xlsx"), range = "DX2:DX450", sheet = 1, col_types = "text")
-  ## Grants changes
-  nback_data4 = read_excel(file.path(subject_path,"Raw/Nback_files/nback_results.xlsx"), range = "BN2:BN450", sheet = 1, col_types = "text")
-  nback_data5 = read_excel(file.path(subject_path,"Raw/Nback_files/nback_results.xlsx"), range = "GO2:GO450", sheet = 1, col_types = "text")
-  nback_data_45 = cbind(nback_data4, nback_data5)
 
   #nback_data1 = read_excel(file.path(subject_path,"Raw/Nback_files/nback_results.xlsx"), range = "EC2:EC450", sheet = 1, col_types = "text")
   #nback_data2 = read_excel(file.path(subject_path,"Raw/Nback_files/nback_results.xlsx"), range = "IT2:JC450", sheet = 1, col_types = "text")
@@ -59,8 +55,23 @@ analyze_nback_subject <- function(subject_path)
 
   # # ORGANIZE # #
 
-  condition_onset_info_dataframe = data.frame(stimulus_onset_times, subject_response_onset)
+  # determine the onset time of each condition
+  unique_subtrials = unique(nback_block_labels)
+  condition_onset_times_corrected <- vector()
+  first_condition_onset_time_corrected <- vector()
+  for (this_condition in unique_subtrials){
+    this_condition_first_stim_index = min(which(nback_block_labels == this_condition))
+    this_condition_onset_time_eprime = stimulus_onset_times[this_condition_first_stim_index]
 
+    if (is.empty(first_condition_onset_time_corrected)){
+      first_condition_onset_time_eprime = this_condition_onset_time_eprime
+      this_condition_onset_time_corrected = 4.5
+    } else {
+      this_condition_onset_time_corrected = this_condition_onset_time_eprime - first_condition_onset_time_eprime + 4.5
+    }
+    condition_onset_times_corrected = append(condition_onset_times_corrected, this_condition_onset_time_corrected)
+  }
+  condition_onset_info_dataframe = data.frame(condition_onset_times_corrected, unique_subtrials)
 
   # remove indices where mr triggered
   # TO DO: remove this for new subjects
@@ -69,24 +80,23 @@ analyze_nback_subject <- function(subject_path)
   subject_response_onset[subject_response_onset == 0] = NA
   subject_response_onset = as.numeric(subject_response_onset)
 
-  # TO DO: check for blocks where subject did not responsd (i.e. forgot which n-back they were performing)
-  nback_omit = unique(nback_data3)
-  nback_omit1 = cbind(nback_data3,nback_data_45) ## has 5s in it
- #condition_omit=list(nback_omit(1:32))
-  #for (i=1:14) itd be nice to get a for loop to do this, but idk
-
-  S10=nback_omit1[1:14,]; L12=nback_omit1[15:28,]; S13=nback_omit1[29:42,]; L11=nback_omit1[43:56,]; S11=nback_omit1[57:70,]
-  S12=nback_omit1[71:84,]; L10=nback_omit1[85:98,]; L13=nback_omit1[99:112,]; S23=nback_omit1[113:126,]; S21=nback_omit1[127:140,]
-  L20=nback_omit1[141:154,]; S22=nback_omit1[155:168,]; S20=nback_omit1[169:182,]; L22=nback_omit1[183:196,]; L21=nback_omit1[197:210,]
-  L23=nback_omit1[211:224,]; L31=nback_omit1[225:238,]; S32=nback_omit1[239:252,]; L33=nback_omit1[253:266,]; S30=nback_omit1[267:280,]
-  L32=nback_omit1[281:294,]; L30=nback_omit1[295:308,]; S33=nback_omit1[309:322,]; S31=nback_omit1[323:336,]; L43=nback_omit1[337:350,]
-  S40=nback_omit1[351:364,]; S42=nback_omit1[365:378,]; S41=nback_omit1[379:392,]; L40=nback_omit1[393:406,]; S43=nback_omit1[407:420,]
-  L42=nback_omit1[421:434,]; L41=nback_omit1[435:448,]
 
 
 
 
-# Second part of nbackdata4 is when the correct answer is supposed to come out, this is wrong currently
+
+
+
+
+
+
+
+
+
+
+
+
+  # Second part of nbackdata4 is when the correct answer is supposed to come out, this is wrong currently
   #Create a new matrix with the unique variables of the subject categories from nback_block_labels using unique func
   #Associate those to their corresponding trials
   #remove the ones that don't have any
