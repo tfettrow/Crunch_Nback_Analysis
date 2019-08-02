@@ -7,9 +7,9 @@ analyze_nback_subject <- function(subject_path)
   library(rprime)
 
   # Grabbing bits and pieces of larger .xlsx file
-  nback_data1 = read_excel(file.path(subject_path,"Raw/Nback_files/nback_results.xlsx"), range = "EB2:EB450", sheet = 1, col_types = "text")
+  nback_data1 = read_excel(file.path(subject_path,"Raw/Nback_files/nback_results.xlsx"), range = "EA2:EC450", sheet = 1, col_types = "text")
   nback_data2 = read_excel(file.path(subject_path,"Raw/Nback_files/nback_results.xlsx"), range = "IS2:JC450", sheet = 1, col_types = "text")
-  nback_data3 = read_excel(file.path(subject_path,"Raw/Nback_files/nback_results.xlsx"), range = "GJ2:GJ450", sheet = 1, col_types = "text")
+  nback_data3 = read_excel(file.path(subject_path,"Raw/Nback_files/nback_results.xlsx"), range = "GJ2:GK450", sheet = 1, col_types = "text")
 
   interstimulus_interval = nback_data1$ISI
 
@@ -109,11 +109,11 @@ analyze_nback_subject <- function(subject_path)
 
   subject_long_percents = data.frame(nback = c(as.character(0:3)), subject_accuracy = c(as.numeric(zero_back_long_accuracy_percent),
                                                                                         as.numeric(two_back_long_accuracy_percent), as.numeric(two_back_long_accuracy_percent), as.numeric(three_back_long_accuracy_percent)),
-                                     isi = c("long", "long", "long", "long"))
+                                     ISI = c("long", "long", "long", "long"))
 
   subject_short_percents = data.frame(nback = c(as.character(0:3)), subject_accuracy = c(as.numeric(zero_back_short_accuracy_percent),
                                                                                          as.numeric(two_back_short_accuracy_percent), as.numeric(two_back_short_accuracy_percent), as.numeric(three_back_short_accuracy_percent)),
-                                      isi = c("short", "short", "short", "short"))
+                                      ISI = c("short", "short", "short", "short"))
 
   accuracy_dataframe_complete = rbind(subject_long_percents,subject_short_percents)
 
@@ -165,20 +165,20 @@ analyze_nback_subject <- function(subject_path)
   ggsave(file)
 
 
-
-  responsetime_file_name_pdf = paste0("ResponseTime_",toString(subject_id),".pdf")
-  file = file.path(subject_path,"Figures",responsetime_file_name_pdf)
-  ggplot(data = responsetime_dataframe, aes(fill = interstimulus_interval_correct, x = factor(nback_level_correct), y = subject_response_onset_correct)) + geom_violin(position = position_dodge(1)) +
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black")) +
-    scale_fill_manual(values=c("orange","blue"))  + ggtitle("Subject Reaction Time for N-Back Levels and ISI") + xlab("N-Back Level") + ylab("Onset Time (ms)")
-  ggsave(file)
-
-  responsetime_file_name_jpeg = paste0("ResponseTime_",toString(subject_id),".jpeg")
-  file = file.path(subject_path,"Figures",responsetime_file_name_jpeg)
-  ggplot(data = responsetime_dataframe, aes(fill = interstimulus_interval_correct, x = factor(nback_level_correct), y = subject_response_onset_correct)) + geom_violin(position = position_dodge(1)) +
-    theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black")) +
-    scale_fill_manual(values=c("orange","blue"))  + ggtitle("Subject Reaction Time for N-Back Levels and ISI") + xlab("N-Back Level") + ylab("Onset Time (ms)")
-  ggsave(file)
+  #Currently not operational.. bug in geom_violin func
+  # responsetime_file_name_pdf = paste0("ResponseTime_",toString(subject_id),".pdf")
+  # file = file.path(subject_path,"Figures",responsetime_file_name_pdf)
+  #ggplot(data = responsetime_dataframe, aes(fill = interstimulus_interval_correct, x = factor(nback_level_correct), y = subject_response_onset_correct)) + geom_violin(position = position_dodge(1))
+  # theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  #   scale_fill_manual(values=c("orange","blue"))  + ggtitle("Subject Reaction Time for N-Back Levels and ISI") + xlab("N-Back Level") + ylab("Onset Time (ms)")
+  # ggsave(file)
+  #
+  # responsetime_file_name_jpeg = paste0("ResponseTime_",toString(subject_id),".jpeg")
+  # file = file.path(subject_path,"Figures",responsetime_file_name_jpeg)
+  # ggplot(data = responsetime_dataframe, aes(fill = interstimulus_interval_correct, x = factor(nback_level_correct), y = subject_response_onset_correct)) + geom_boxplot(position = position_dodge(1)) +
+  #   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  #   scale_fill_manual(values=c("orange","blue"))  + ggtitle("Subject Reaction Time for N-Back Levels and ISI") + xlab("N-Back Level") + ylab("Onset Time (ms)")
+  # ggsave(file)
 
   #  -----------------------------------------------------------------------------------------------
 
