@@ -6,37 +6,10 @@ analyze_nback_subject <- function(subject_path)
   library(ggplot2)
   library(rprime)
 
-  # # Trying rprime package for eprime txt output, but not working out so far..
-
-  # eprime_data = read_eprime('SpatialN_Real_nofMRI_Cumulative_Scanner-2-1.txt', remove_clock = TRUE)
-  # data = stri_read_lines('SpatialN_Real_nofMRI_Cumulative_Scanner-2-1.txt')
-  # data = to_data_frame(eprime_data)
-
-
-  # set path info
-  # TO DO: consider adding subject argument to shell script to run this r script
-
-
-  #  -----------------------------------------------------------------------------------------------
-
-  # # LOAD DATA # #
-  # for now convert eprime dataaid to .xlsx
-
-  # TO DO: what to do for multiple subjects?
-  # 1) export subject figures to "Figures/Subject" with file name "Datatype_SubjectID"
-  # 2) make a new script that grabs subject data (based on argument) and produces group level results file
-  # 3) this script will create and export figures to "Figures/Group" with file name ""
-  # 4) clean up code
-  # a) create single data frame for accuracy and response time(calulate percent correct from dataframe..??)
-
-
-  nback_data1 = read_excel(file.path(subject_path,"Raw/Nback_files/nback_results.xlsx"), range = "BL2:BP450", sheet = 1, col_types = "text")
-  nback_data2 = read_excel(file.path(subject_path,"Raw/Nback_files/nback_results.xlsx"), range = "GE2:GP450", sheet = 1, col_types = "text")
-  nback_data3 = read_excel(file.path(subject_path,"Raw/Nback_files/nback_results.xlsx"), range = "DX2:DX450", sheet = 1, col_types = "text")
-
-  #nback_data1 = read_excel(file.path(subject_path,"Raw/Nback_files/nback_results.xlsx"), range = "EC2:EC450", sheet = 1, col_types = "text")
-  #nback_data2 = read_excel(file.path(subject_path,"Raw/Nback_files/nback_results.xlsx"), range = "IT2:JC450", sheet = 1, col_types = "text")
-  #nback_data3 = read_excel(file.path(subject_path,"Raw/Nback_files/nback_results.xlsx"), range = "GK2:GK450", sheet = 1, col_types = "text")
+  # Grabbing bits and pieces of larger .xlsx file
+  nback_data1 = read_excel(file.path(subject_path,"Raw/Nback_files/nback_results.xlsx"), range = "EB2:EB450", sheet = 1, col_types = "text")
+  nback_data2 = read_excel(file.path(subject_path,"Raw/Nback_files/nback_results.xlsx"), range = "IS2:JC450", sheet = 1, col_types = "text")
+  nback_data3 = read_excel(file.path(subject_path,"Raw/Nback_files/nback_results.xlsx"), range = "GJ2:GJ450", sheet = 1, col_types = "text")
 
   interstimulus_interval = nback_data1$ISI
 
@@ -50,6 +23,7 @@ analyze_nback_subject <- function(subject_path)
   nback_level = stri_sub(nback_block_labels, -1,-1)
   nback_level = as.numeric(nback_level)
 
+  subject_accuracy_eprime = nback_data2$Stimulus.ACC
 
   #  -----------------------------------------------------------------------------------------------
 
@@ -79,15 +53,7 @@ analyze_nback_subject <- function(subject_path)
   }
   condition_onset_info_dataframe = data.frame(condition_onset_times_corrected, unique_subtrials)
 
-  # remove indices where mr triggered
-  # TO DO: remove this for new subjects
-  indices_to_remove = which(subject_response == 5)
-  subject_response_onset[indices_to_remove] = 0
-  subject_response_onset[subject_response_onset == 0] = NA
-  subject_response_onset = as.numeric(subject_response_onset)
-
-
-  # TO DO: check for blocks where subject did not responsd (i.e. forgot which n-back they were performing)
+  # remove indices of condition where subject forgot which nback they were performing
   noresponse_condition_indices <- vector()
   for (this_condition in unique_subtrials){
       this_condition_stim_indices = (which(nback_block_labels == this_condition))
@@ -97,35 +63,39 @@ analyze_nback_subject <- function(subject_path)
     }
   }
 
+  # TO DO: what to do if subject responded when a response was NOT expected ... for now ignoring erroneous repsonses.. only interested in respond to expected or not
+  # TO DO: what happens if response triggers on next stimulus?/ reaction time is really low?
 
   # # subject response accuracy # #
-  # produces a logical array indicating whether the subject responed when expected, or not
-  # TO DO: what to do if subject responded when a response was NOT expected ... for now ignoring erroneous repsonses.. only interested in respond to expected or not
-  subject_accuracy_r = expected_correct_response == subject_response
+  # produces a logical array indicating whether the subject responded when expected, or not
+  subject_accuracy_r = subject_accuracy_eprime == expected_correct_response
 
-  # convert accuracy into percent ... is there a simpler method?
+  # find only the indices where an expected response was expected and remove the subtrials where subject forgot which nback they were on
   accuracy_na_indices_removed = which(!is.na(subject_accuracy_r))
-  Accuracy_dataframe_noNA = data.frame(nback_level[accuracy_na_indices_removed], subject_accuracy_r[accuracy_na_indices_removed], interstimulus_interval[accuracy_na_indices_removed])
+  accuracy_na_indices_removed = accuracy_na_indices_removed [!accuracy_na_indices_removed %in% noresponse_condition_indices]
 
-  zero_back_short_indices = which(Accuracy_dataframe_noNA$interstimulus_interval==500 & Accuracy_dataframe_noNA$nback_level == 0)
-  one_back_short_indices = which(Accuracy_dataframe_noNA$interstimulus_interval==500 & Accuracy_dataframe_noNA$nback_level == 1)
-  two_back_short_indices = which(Accuracy_dataframe_noNA$interstimulus_interval==500 & Accuracy_dataframe_noNA$nback_level == 2)
-  three_back_short_indices = which(Accuracy_dataframe_noNA$interstimulus_interval==500 & Accuracy_dataframe_noNA$nback_level == 3)
+  # convert accuracy into percent ... find a simpler method!
+  accuracy_dataframe_nona = data.frame(nback_level[accuracy_na_indices_removed], subject_accuracy_r[accuracy_na_indices_removed], interstimulus_interval[accuracy_na_indices_removed])
 
-  zero_back_long_indices = which(Accuracy_dataframe_noNA$interstimulus_interval==1500 & Accuracy_dataframe_noNA$nback_level == 0)
-  one_back_long_indices = which(Accuracy_dataframe_noNA$interstimulus_interval==1500 & Accuracy_dataframe_noNA$nback_level == 1)
-  two_back_long_indices = which(Accuracy_dataframe_noNA$interstimulus_interval==1500 & Accuracy_dataframe_noNA$nback_level == 2)
-  three_back_long_indices = which(Accuracy_dataframe_noNA$interstimulus_interval==1500 & Accuracy_dataframe_noNA$nback_level == 3)
+  zero_back_short_indices = which(accuracy_dataframe_nona$interstimulus_interval==500 & accuracy_dataframe_nona$nback_level == 0)
+  one_back_short_indices = which(accuracy_dataframe_nona$interstimulus_interval==500 & accuracy_dataframe_nona$nback_level == 1)
+  two_back_short_indices = which(accuracy_dataframe_nona$interstimulus_interval==500 & accuracy_dataframe_nona$nback_level == 2)
+  three_back_short_indices = which(accuracy_dataframe_nona$interstimulus_interval==500 & accuracy_dataframe_nona$nback_level == 3)
 
-  zero_back_short_accuracy = Accuracy_dataframe_noNA$subject_accuracy_r[zero_back_short_indices]
-  one_back_short_accuracy = Accuracy_dataframe_noNA$subject_accuracy_r[one_back_short_indices]
-  two_back_short_accuracy = Accuracy_dataframe_noNA$subject_accuracy_r[two_back_short_indices]
-  three_back_short_accuracy = Accuracy_dataframe_noNA$subject_accuracy_r[three_back_short_indices]
+  zero_back_long_indices = which(accuracy_dataframe_nona$interstimulus_interval==1500 & accuracy_dataframe_nona$nback_level == 0)
+  one_back_long_indices = which(accuracy_dataframe_nona$interstimulus_interval==1500 & accuracy_dataframe_nona$nback_level == 1)
+  two_back_long_indices = which(accuracy_dataframe_nona$interstimulus_interval==1500 & accuracy_dataframe_nona$nback_level == 2)
+  three_back_long_indices = which(accuracy_dataframe_nona$interstimulus_interval==1500 & accuracy_dataframe_nona$nback_level == 3)
 
-  zero_back_long_accuracy = Accuracy_dataframe_noNA$subject_accuracy_r[zero_back_long_indices]
-  one_back_long_accuracy = Accuracy_dataframe_noNA$subject_accuracy_r[one_back_long_indices]
-  two_back_long_accuracy = Accuracy_dataframe_noNA$subject_accuracy_r[two_back_long_indices]
-  three_back_long_accuracy = Accuracy_dataframe_noNA$subject_accuracy_r[three_back_long_indices]
+  zero_back_short_accuracy = accuracy_dataframe_nona$subject_accuracy_r[zero_back_short_indices]
+  one_back_short_accuracy = accuracy_dataframe_nona$subject_accuracy_r[one_back_short_indices]
+  two_back_short_accuracy = accuracy_dataframe_nona$subject_accuracy_r[two_back_short_indices]
+  three_back_short_accuracy = accuracy_dataframe_nona$subject_accuracy_r[three_back_short_indices]
+
+  zero_back_long_accuracy = accuracy_dataframe_nona$subject_accuracy_r[zero_back_long_indices]
+  one_back_long_accuracy = accuracy_dataframe_nona$subject_accuracy_r[one_back_long_indices]
+  two_back_long_accuracy = accuracy_dataframe_nona$subject_accuracy_r[two_back_long_indices]
+  three_back_long_accuracy = accuracy_dataframe_nona$subject_accuracy_r[three_back_long_indices]
 
   zero_back_short_accuracy_percent = sum(zero_back_short_accuracy) / length (zero_back_short_accuracy) * 100
   one_back_short_accuracy_percent = sum(one_back_short_accuracy) / length (one_back_short_accuracy) * 100
@@ -139,16 +109,18 @@ analyze_nback_subject <- function(subject_path)
 
   subject_long_percents = data.frame(nback = c(as.character(0:3)), subject_accuracy = c(as.numeric(zero_back_long_accuracy_percent),
                                                                                         as.numeric(two_back_long_accuracy_percent), as.numeric(two_back_long_accuracy_percent), as.numeric(three_back_long_accuracy_percent)),
-                                     ISI = c("long", "long", "long", "long"))
+                                     isi = c("long", "long", "long", "long"))
 
   subject_short_percents = data.frame(nback = c(as.character(0:3)), subject_accuracy = c(as.numeric(zero_back_short_accuracy_percent),
                                                                                          as.numeric(two_back_short_accuracy_percent), as.numeric(two_back_short_accuracy_percent), as.numeric(three_back_short_accuracy_percent)),
-                                      ISI = c("short", "short", "short", "short"))
+                                      isi = c("short", "short", "short", "short"))
 
   accuracy_dataframe_complete = rbind(subject_long_percents,subject_short_percents)
 
 
   # # response time by nback # #
+  #response_correct_indices = expected_correct_response == correct_response_eprime
+
   subject_accuracy_r_numeric = as.numeric(subject_accuracy_r)
   response_correct_indices = which(subject_accuracy_r_numeric == 1)
 
@@ -160,14 +132,16 @@ analyze_nback_subject <- function(subject_path)
 
   #  -----------------------------------------------------------------------------------------------
 
+  # # WRITE DATA OF INTEREST TO FILE # #
+
   # some funny stuff to be able to grab the subject ID for file naming
   subject_path_string_split = strsplit(subject_path,"/")[1][1]
   subject_id = vapply(subject_path_string_split, tail, "", 1)
 
   # # Store Data in Processed folder # #
-  write.csv(responsetime_dataframe, file = file.path(subject_path, paste0("Processed/Nback_files/responseTime_", toString(subject_id))))
-  write.csv(accuracy_dataframe_complete, file = file.path(subject_path, paste0("Processed/Nback_files/responseTime_", toString(subject_id))))
-  write.csv(condition_onset_info_dataframe, file = file.path(subject_path, paste0("Processed/Nback_files/responseTime_", toString(subject_id))))
+  write.csv(responsetime_dataframe, file = file.path(subject_path, paste0("Processed/Nback_files/responseTime_", toString(subject_id),".csv")))
+  write.csv(accuracy_dataframe_complete, file = file.path(subject_path, paste0("Processed/Nback_files/accuracy_", toString(subject_id),".csv")))
+  write.csv(condition_onset_info_dataframe, file = file.path(subject_path, paste0("Processed/Nback_files/conditionOnset_", toString(subject_id),".csv")))
 
   #  -----------------------------------------------------------------------------------------------
 
@@ -194,8 +168,8 @@ analyze_nback_subject <- function(subject_path)
 
   responsetime_file_name_pdf = paste0("ResponseTime_",toString(subject_id),".pdf")
   file = file.path(subject_path,"Figures",responsetime_file_name_pdf)
-  ggplot(data = responsetime_dataframe, aes(fill = interstimulus_interval_correct, x = factor(nback_level_correct), y = subject_response_onset_correct)) + geom_violin(position = position_dodge(1))
-  + geom_point(position = position_dodge(1)) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  ggplot(data = responsetime_dataframe, aes(fill = interstimulus_interval_correct, x = factor(nback_level_correct), y = subject_response_onset_correct)) + geom_violin(position = position_dodge(1)) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black")) +
     scale_fill_manual(values=c("orange","blue"))  + ggtitle("Subject Reaction Time for N-Back Levels and ISI") + xlab("N-Back Level") + ylab("Onset Time (ms)")
   ggsave(file)
 
