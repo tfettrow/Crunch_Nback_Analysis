@@ -28,7 +28,7 @@ analyze_nback_subject <- function(subject_path)
   # 3) this script will create and export figures to "Figures/Group" with file name ""
   # 4) clean up code
   # a) create single data frame for accuracy and response time(calulate percent correct from dataframe..??)
-  # b)
+
 
   nback_data1 = read_excel(file.path(subject_path,"Raw/Nback_files/nback_results.xlsx"), range = "BL2:BP450", sheet = 1, col_types = "text")
   nback_data2 = read_excel(file.path(subject_path,"Raw/Nback_files/nback_results.xlsx"), range = "GE2:GP450", sheet = 1, col_types = "text")
@@ -58,17 +58,23 @@ analyze_nback_subject <- function(subject_path)
   # determine the onset time of each condition
   unique_subtrials = unique(nback_block_labels)
   condition_onset_times_corrected <- vector()
-  first_condition_onset_time_corrected <- vector()
+  first_condition_onset_time_eprime <- vector()
   for (this_condition in unique_subtrials){
     this_condition_first_stim_index = min(which(nback_block_labels == this_condition))
     this_condition_onset_time_eprime = stimulus_onset_times[this_condition_first_stim_index]
 
-    if (is.empty(first_condition_onset_time_corrected)){
+    # reset the time correction every 8 conditions (this makes up a run)
+    if (length(condition_onset_times_corrected)%%8 == 0 & length(condition_onset_times_corrected) >= 8){
+      first_condition_onset_time_eprime <- vector()
+    }
+
+    if (length(first_condition_onset_time_eprime) == 0){
       first_condition_onset_time_eprime = this_condition_onset_time_eprime
       this_condition_onset_time_corrected = 4.5
     } else {
-      this_condition_onset_time_corrected = this_condition_onset_time_eprime - first_condition_onset_time_eprime + 4.5
+      this_condition_onset_time_corrected = ((as.numeric(this_condition_onset_time_eprime) - as.numeric(first_condition_onset_time_eprime)) / 1000) + 4.5
     }
+
     condition_onset_times_corrected = append(condition_onset_times_corrected, this_condition_onset_time_corrected)
   }
   condition_onset_info_dataframe = data.frame(condition_onset_times_corrected, unique_subtrials)
@@ -81,25 +87,15 @@ analyze_nback_subject <- function(subject_path)
   subject_response_onset = as.numeric(subject_response_onset)
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  # Second part of nbackdata4 is when the correct answer is supposed to come out, this is wrong currently
-  #Create a new matrix with the unique variables of the subject categories from nback_block_labels using unique func
-  #Associate those to their corresponding trials
-  #remove the ones that don't have any
+  # TO DO: check for blocks where subject did not responsd (i.e. forgot which n-back they were performing)
+  noresponse_condition_indices <- vector()
+  for (this_condition in unique_subtrials){
+      this_condition_stim_indices = (which(nback_block_labels == this_condition))
+      subject_response_this_condition <- subject_response[this_condition_stim_indices]
+      if (is.na(any(subject_response_this_condition==1))){
+        noresponse_condition_indices <- append(noresponse_condition_indices, this_condition_stim_indices)
+    }
+  }
 
 
   # # subject response accuracy # #
