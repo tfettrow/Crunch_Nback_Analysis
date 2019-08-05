@@ -11,7 +11,7 @@ analyze_nback_group <- function(subject_paths)
     this_subject_path_string_split = strsplit(this_subject_path,"/")[1][1]
     this_subject_id = vapply(this_subject_path_string_split, tail, "", 1)
 
-
+    print(this_subject_id)
 
 
     # for each subject id read the responseTime.txt
