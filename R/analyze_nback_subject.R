@@ -6,6 +6,11 @@ analyze_nback_subject <- function(subject_path)
   library(ggplot2)
   library(rprime)
 
+  # some funny stuff to be able to grab the subject ID for file naming
+  subject_path_string_split = strsplit(subject_path,"/")[1][1]
+  subject_id = vapply(subject_path_string_split, tail, "", 1)
+
+
   # Grabbing bits and pieces of larger .xlsx file
   nback_data1 = read_excel(file.path(subject_path,"Raw/Nback_files/nback_results.xlsx"), range = "EA2:EC450", sheet = 1, col_types = "text")
   nback_data2 = read_excel(file.path(subject_path,"Raw/Nback_files/nback_results.xlsx"), range = "IS2:JC450", sheet = 1, col_types = "text")
@@ -77,7 +82,7 @@ analyze_nback_subject <- function(subject_path)
   # convert accuracy into percent ... find a simpler method!
   accuracy_dataframe_nona = data.frame(nback_level[accuracy_na_indices_removed], subject_accuracy_r[accuracy_na_indices_removed], interstimulus_interval[accuracy_na_indices_removed])
 
-  zero_back_short_indices = which(accuracy_dataframe_nona$interstimulus_interval==500 & accuracy_dataframe_nona$nback_level == 0)
+  zero_back_short_indices = which(accuracy_dataframe_nona$interstimulus_interval == 500 & accuracy_dataframe_nona$nback_level == 0)
   one_back_short_indices = which(accuracy_dataframe_nona$interstimulus_interval==500 & accuracy_dataframe_nona$nback_level == 1)
   two_back_short_indices = which(accuracy_dataframe_nona$interstimulus_interval==500 & accuracy_dataframe_nona$nback_level == 2)
   three_back_short_indices = which(accuracy_dataframe_nona$interstimulus_interval==500 & accuracy_dataframe_nona$nback_level == 3)
@@ -107,13 +112,9 @@ analyze_nback_subject <- function(subject_path)
   two_back_long_accuracy_percent = sum(two_back_long_accuracy) / length (two_back_long_accuracy) * 100
   three_back_long_accuracy_percent = sum(three_back_long_accuracy) / length (three_back_long_accuracy) * 100
 
-  subject_long_percents = data.frame(nback = c(as.character(0:3)), subject_accuracy = c(as.numeric(zero_back_long_accuracy_percent),
-                                                                                        as.numeric(two_back_long_accuracy_percent), as.numeric(two_back_long_accuracy_percent), as.numeric(three_back_long_accuracy_percent)),
-                                     ISI = c("long", "long", "long", "long"))
+  subject_long_percents = data.frame(nback = c(as.character(0:3)), subject_accuracy = c(as.numeric(zero_back_long_accuracy_percent), as.numeric(two_back_long_accuracy_percent), as.numeric(two_back_long_accuracy_percent), as.numeric(three_back_long_accuracy_percent)), ISI = c("long", "long", "long", "long"), subject_id)
 
-  subject_short_percents = data.frame(nback = c(as.character(0:3)), subject_accuracy = c(as.numeric(zero_back_short_accuracy_percent),
-                                                                                         as.numeric(two_back_short_accuracy_percent), as.numeric(two_back_short_accuracy_percent), as.numeric(three_back_short_accuracy_percent)),
-                                      ISI = c("short", "short", "short", "short"))
+  subject_short_percents = data.frame(nback = c(as.character(0:3)), subject_accuracy = c(as.numeric(zero_back_short_accuracy_percent), as.numeric(two_back_short_accuracy_percent), as.numeric(two_back_short_accuracy_percent), as.numeric(three_back_short_accuracy_percent)), ISI = c("short", "short", "short", "short"), subject_id)
 
   accuracy_dataframe_complete = rbind(subject_long_percents,subject_short_percents)
 
@@ -128,15 +129,11 @@ analyze_nback_subject <- function(subject_path)
   subject_response_onset_correct = subject_response_onset[response_correct_indices]
   interstimulus_interval_correct = interstimulus_interval[response_correct_indices]
 
-  responsetime_dataframe = data.frame(nback_level_correct, subject_response_onset_correct, interstimulus_interval_correct)
+  responsetime_dataframe = data.frame(nback_level_correct, subject_response_onset_correct, interstimulus_interval_correct, subject_id)
 
   #  -----------------------------------------------------------------------------------------------
 
   # # WRITE DATA OF INTEREST TO FILE # #
-
-  # some funny stuff to be able to grab the subject ID for file naming
-  subject_path_string_split = strsplit(subject_path,"/")[1][1]
-  subject_id = vapply(subject_path_string_split, tail, "", 1)
 
   # # Store Data in Processed folder # #
   write.csv(responsetime_dataframe, file = file.path(subject_path, paste0("Processed/Nback_files/responseTime_", toString(subject_id),".csv")))
