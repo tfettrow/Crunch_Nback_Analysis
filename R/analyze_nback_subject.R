@@ -165,10 +165,10 @@ analyze_nback_subject <- function(subject_path)
   ggsave(file)
 
 
-  #Currently not operational.. bug in geom_violin func
+  #Currently not operational.. bug in geom_violin func when too few data
   # responsetime_file_name_pdf = paste0("ResponseTime_",toString(subject_id),".pdf")
   # file = file.path(subject_path,"Figures",responsetime_file_name_pdf)
-  #ggplot(data = responsetime_dataframe, aes(fill = interstimulus_interval_correct, x = factor(nback_level_correct), y = subject_response_onset_correct)) + geom_violin(position = position_dodge(1))
+  # ggplot(data = responsetime_dataframe, aes(fill = interstimulus_interval_correct, x = factor(nback_level_correct), y = subject_response_onset_correct)) + geom_violin(position = position_dodge(1))
   # theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black")) +
   #   scale_fill_manual(values=c("orange","blue"))  + ggtitle("Subject Reaction Time for N-Back Levels and ISI") + xlab("N-Back Level") + ylab("Onset Time (ms)")
   # ggsave(file)
