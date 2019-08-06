@@ -47,7 +47,7 @@ analyze_nback_group <- function(subject_paths)
 
 
 
-    all_responseTime_data = rbind(all_responseTime_data, responseTime_data)
+    all_responseTime_data = rbind.list(all_responseTime_data, responseTime_data)
     write.csv(all_responseTime_data, file = file.path("Results/Nback_files", paste0("Nback_files", toString("_Group_responseTime"),".csv")))
 
 
