@@ -28,12 +28,8 @@ analyze_nback_group <- function(subject_paths)
   write.csv(all_responseTime_data, file = file.path("Group_Results/Nback_files", paste0("Nback_files", toString("_Group_responseTime"),".csv")))
 
 
-
   all_accuracy_data_averaged <- aggregate(all_accuracy_data["subject_accuracy"], by=list(all_accuracy_data$ISI, all_accuracy_data$nback),FUN=mean)
   colnames(all_accuracy_data_averaged) <- c("ISI", "nback", "averaged_accuracy")
-
-  # all_responseTime_data_averaged <- aggregate(all_responseTime_data["subject_response_onset_correct"], by=list(all_responseTime_data$interstimulus_interval_correct, all_responseTime_data$nback_level_correct),FUN=mean)
-  #colnames(all_responseTime_data) <- c("ISI", "nback", "averaged_response_time")
 
 
   # TO DO: need a way to find the Study folder regardless of current directory
