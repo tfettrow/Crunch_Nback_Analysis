@@ -30,10 +30,10 @@ analyze_nback_group <- function(subject_paths)
 
 
   all_accuracy_data_averaged <- aggregate(all_accuracy_data["subject_accuracy"], by=list(all_accuracy_data$ISI, all_accuracy_data$nback),FUN=mean)
-  colnames(accuracy_dataframe_complete) <- c("ISI", "nback", "subject_accuracy")
+  colnames(all_accuracy_data_averaged) <- c("ISI", "nback", "averaged_accuracy")
 
-  all_accuracy_data_averaged <- aggregate(all_accuracy_data["subject_accuracy"], by=list(all_accuracy_data$ISI, all_accuracy_data$nback),FUN=mean)
-  colnames(accuracy_dataframe_complete) <- c("ISI", "nback", "subject_accuracy")
+  # all_responseTime_data_averaged <- aggregate(all_responseTime_data["subject_response_onset_correct"], by=list(all_responseTime_data$interstimulus_interval_correct, all_responseTime_data$nback_level_correct),FUN=mean)
+  #colnames(all_responseTime_data) <- c("ISI", "nback", "averaged_response_time")
 
 
   # TO DO: need a way to find the Study folder regardless of current directory
@@ -52,7 +52,7 @@ analyze_nback_group <- function(subject_paths)
 
   accuracy_file_name_jpeg = paste0("Group_Accuracy",".jpeg")
   file = file.path("Group_Results/Figures", accuracy_file_name_jpeg)
-  accuracy_fig = ggplot(data=all_accuracy_data, aes(fill = ISI, x = nback, y=subject_accuracy)) + geom_bar(position = "dodge", stat = "identity")
+  accuracy_fig = ggplot(data=all_accuracy_data_averaged, aes(fill = ISI, x = nback, y=averaged_accuracy)) + geom_bar(position = "dodge", stat = "identity")
   accuracy_fig + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                        panel.background = element_blank(), axis.line = element_line(colour = "black")) + ggtitle("Subject Accuracy for N-Back Levels and ISI") + xlab("N-Back Level") + ylab("Percent Correct (%)") +
     scale_fill_manual(values=c("orange","blue"))
@@ -60,15 +60,15 @@ analyze_nback_group <- function(subject_paths)
 
   responsetime_file_name_pdf = paste0("Group_ResponseTime",".pdf")
   file = file.path("Group_Results/Figures", responsetime_file_name_pdf)
-  ggplot(data = all_responseTime_data, aes(fill = interstimulus_interval_correct, x = factor(nback_level_correct), y = subject_response_onset_correct)) + geom_violin(position = position_dodge(1)) +
-    theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black")) +
-     scale_fill_manual(values=c("orange","blue"))  + ggtitle("Reaction Time for N-Back Levels and ISI") + xlab("N-Back Level") + ylab("Onset Time (ms)")
+  ggplot(all_responseTime_data, aes(x = factor(nback_level_correct), y = subject_response_onset_correct)) + geom_violin(aes(fill = factor(interstimulus_interval_correct))) +
+    theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"), legend.title = element_blank()) +
+    scale_fill_manual(values=c("orange","blue"))  + ggtitle("Reaction Time for N-Back Levels and ISI") + xlab("N-Back Level") + ylab("Onset Time (ms)")
   ggsave(file)
 
    responsetime_file_name_jpeg = paste0("Group_ResponseTime",".jpeg")
    file = file.path("Group_Results/Figures", responsetime_file_name_jpeg)
-   ggplot(data = all_responseTime_data, aes(fill = interstimulus_interval_correct, x = factor(nback_level_correct), y = subject_response_onset_correct)) + geom_violin(position = position_dodge(1)) +
-   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+   ggplot(all_responseTime_data, aes(x = factor(nback_level_correct), y = subject_response_onset_correct)) + geom_violin(aes(fill = factor(interstimulus_interval_correct))) +
+     theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"), legend.title = element_blank()) +
      scale_fill_manual(values=c("orange","blue"))  + ggtitle("Reaction Time for N-Back Levels and ISI") + xlab("N-Back Level") + ylab("Onset Time (ms)")
    ggsave(file)
 
