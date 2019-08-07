@@ -16,37 +16,24 @@ analyze_nback_group <- function(subject_paths)
 
     accuracy_data = read.csv(file.path(this_subject_path, paste0("Processed/Nback_files/accuracy_", toString(this_subject_id), ".csv")))
     all_accuracy_data = rbind(all_accuracy_data, accuracy_data)
-    write.csv(all_accuracy_data, file = file.path("Group_Results/Nback_files", paste0("Nback_files", toString("_Group_accuracy"),".csv")))
+
 
     responseTime_data = read.csv(file.path(this_subject_path, paste0("Processed/Nback_files/responseTime_", toString(this_subject_id), ".csv")))
     all_responseTime_data = rbind(all_responseTime_data, responseTime_data)
-    write.csv(all_responseTime_data, file = file.path("Group_Results/Nback_files", paste0("Nback_files", toString("_Group_responseTime"),".csv")))
+
   }
 
-  zero_back_short_accuracy_percent_group_indices = which(all_accuracy_data$nback == 0 & all_accuracy_data$ISI == "short")
-  zero_back_long_accuracy_percent_group_indices = which(all_accuracy_data$nback == 0 & all_accuracy_data$ISI == "long")
-  one_back_short_accuracy_percent_group_indices = which(all_accuracy_data$nback == 1 & all_accuracy_data$ISI == "short")
-  one_back_long_accuracy_percent_group_indices = which(all_accuracy_data$nback == 1 & all_accuracy_data$ISI == "long")
-  two_back_short_accuracy_percent_group_indices = which(all_accuracy_data$nback == 2 & all_accuracy_data$ISI == "short")
-  two_back_long_accuracy_percent_group_indices = which(all_accuracy_data$nback == 2 & all_accuracy_data$ISI == "long")
-  three_back_short_accuracy_percent_group_indices = which(all_accuracy_data$nback == 3 & all_accuracy_data$ISI == "short")
-  three_back_long_accuracy_percent_group_indices = which(all_accuracy_data$nback == 3 & all_accuracy_data$ISI == "long")
+  write.csv(all_accuracy_data, file = file.path("Group_Results/Nback_files", paste0("Nback_files", toString("_Group_accuracy"),".csv")))
 
-  zero_back_short_group_average = mean(all_accuracy_data$subject_accuracy[zero_back_short_accuracy_percent_group_indices])
-  zero_back_long_group_average = mean(all_accuracy_data$subject_accuracy[zero_back_long_accuracy_percent_group_indices])
-  one_back_short_group_average = mean(all_accuracy_data$subject_accuracy[one_back_short_accuracy_percent_group_indices])
-  one_back_long_group_average = mean(all_accuracy_data$subject_accuracy[one_back_long_accuracy_percent_group_indices])
-  two_back_short_group_average = mean(all_accuracy_data$subject_accuracy[two_back_short_accuracy_percent_group_indices])
-  two_back_long_group_average = mean(all_accuracy_data$subject_accuracy[two_back_long_accuracy_percent_group_indices])
-  three_back_short_group_average = mean(all_accuracy_data$subject_accuracy[three_back_short_accuracy_percent_group_indices])
-  three_back_long_group_average = mean(all_accuracy_data$subject_accuracy[three_back_long_accuracy_percent_group_indices])
+  write.csv(all_responseTime_data, file = file.path("Group_Results/Nback_files", paste0("Nback_files", toString("_Group_responseTime"),".csv")))
 
 
-  averaged_long_percents = data.frame(nback = c(as.character(0:3)), averaged_accuracy = c(as.numeric(zero_back_long_group_average), as.numeric(one_back_long_group_average), as.numeric(two_back_long_group_average), as.numeric(three_back_long_group_average)), ISI = c("long", "long", "long", "long"))
 
-  averaged_short_percents = data.frame(nback = c(as.character(0:3)), averaged_accuracy = c(as.numeric(zero_back_short_group_average), as.numeric(one_back_short_group_average), as.numeric(two_back_short_group_average), as.numeric(three_back_short_group_average)), ISI = c("short", "short", "short", "short"))
+  all_accuracy_data_averaged <- aggregate(all_accuracy_data["subject_accuracy"], by=list(all_accuracy_data$ISI, all_accuracy_data$nback),FUN=mean)
+  colnames(accuracy_dataframe_complete) <- c("ISI", "nback", "subject_accuracy")
 
-  accuracy_dataframe_complete = rbind(averaged_long_percents,averaged_short_percents)
+  all_accuracy_data_averaged <- aggregate(all_accuracy_data["subject_accuracy"], by=list(all_accuracy_data$ISI, all_accuracy_data$nback),FUN=mean)
+  colnames(accuracy_dataframe_complete) <- c("ISI", "nback", "subject_accuracy")
 
 
   # TO DO: need a way to find the Study folder regardless of current directory
@@ -57,7 +44,7 @@ analyze_nback_group <- function(subject_paths)
 
   accuracy_file_name_pdf = paste0("Group_Accuracy",".pdf")
   file = file.path("Group_Results/Figures", accuracy_file_name_pdf)
-  accuracy_fig = ggplot(data=accuracy_dataframe_complete, aes(fill = ISI, x = nback, y=averaged_accuracy)) + geom_bar(position = "dodge", stat = "identity")
+  accuracy_fig = ggplot(data=all_accuracy_data_averaged, aes(fill = ISI, x = nback, y=averaged_accuracy)) + geom_bar(position = "dodge", stat = "identity")
   accuracy_fig + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                        panel.background = element_blank(), axis.line = element_line(colour = "black")) + ggtitle("Subject Accuracy for N-Back Levels and ISI") + xlab("N-Back Level") + ylab("Percent Correct (%)") +
     scale_fill_manual(values=c("orange","blue"))
