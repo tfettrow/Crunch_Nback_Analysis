@@ -8,7 +8,7 @@ analyze_nback_group <- function(subject_paths)
 
   # TO DO: need a way to find the Study folder regardless of current directory
 
-  # TO DO: how to structure group .. (i.e. OA vs YA) ... make another argument in function "group_name" and use this to name files and figs
+  # TO DO: how to structure group .. (i.e. OA vs YA vs whatever) ... make another argument in function "group_name" and use this to name files and figs
 
 
   all_accuracy_data <- vector()
