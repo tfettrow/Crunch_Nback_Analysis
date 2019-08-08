@@ -6,6 +6,10 @@ analyze_nback_group <- function(subject_paths)
   library(ggplot2)
   library(rprime)
 
+  # TO DO: need a way to find the Study folder regardless of current directory
+
+  # TO DO: how to structure group .. (i.e. OA vs YA) ... make another argument in function "group_name" and use this to name files and figs
+
 
   all_accuracy_data <- vector()
   all_responseTime_data <- vector()
@@ -31,12 +35,6 @@ analyze_nback_group <- function(subject_paths)
   all_accuracy_data_averaged <- aggregate(all_accuracy_data["subject_accuracy"], by=list(all_accuracy_data$ISI, all_accuracy_data$nback),FUN=mean)
   colnames(all_accuracy_data_averaged) <- c("ISI", "nback", "averaged_accuracy")
 
-
-  # TO DO: need a way to find the Study folder regardless of current directory
-
-  # TO DO: how to structure group .. (i.e. OA vs YA) ... make another argument in function "group_name" and use this to name files and figs
-
-  # TO DO: why isn't violin plotting in color?
 
   accuracy_file_name_pdf = paste0("Group_Accuracy",".pdf")
   file = file.path("Group_Results/Figures", accuracy_file_name_pdf)
