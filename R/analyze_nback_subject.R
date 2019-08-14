@@ -10,25 +10,22 @@ analyze_nback_subject <- function(subject_path)
   subject_path_string_split = strsplit(subject_path,"/")[1][1]
   subject_id = vapply(subject_path_string_split, tail, "", 1)
 
-
   # Grabbing bits and pieces of larger .xlsx file
-  nback_data1 = read_excel(file.path(subject_path,"Raw/Nback_files/nback_results.xlsx"), range = "EA2:EC450", sheet = 1, col_types = "text")
-  nback_data2 = read_excel(file.path(subject_path,"Raw/Nback_files/nback_results.xlsx"), range = "IS2:JC450", sheet = 1, col_types = "text")
-  nback_data3 = read_excel(file.path(subject_path,"Raw/Nback_files/nback_results.xlsx"), range = "GJ2:GK450", sheet = 1, col_types = "text")
+  nback_data = read_excel(file.path(subject_path,"Raw/Nback_files/nback_results.xlsx"), cell_rows(2:450), sheet = 1, col_types = "text")
 
-  interstimulus_interval = nback_data1$ISI
+  interstimulus_interval = nback_data$ISI
 
-  stimulus_onset_times = nback_data2$Stimulus.OnsetTime
+  stimulus_onset_times = nback_data$Stimulus.OnsetTime
 
-  expected_correct_response = nback_data2$Stimulus.CRESP
-  subject_response = nback_data2$Stimulus.RESP
-  subject_response_onset = nback_data2$Stimulus.RT
+  expected_correct_response = nback_data$Stimulus.CRESP
+  subject_response = nback_data$Stimulus.RESP
+  subject_response_onset = nback_data$Stimulus.RT
 
-  nback_block_labels = nback_data3$`Running[SubTrial]`
+  nback_block_labels = nback_data$`Running[SubTrial]`
   nback_level = stri_sub(nback_block_labels, -1,-1)
   nback_level = as.numeric(nback_level)
 
-  subject_accuracy_eprime = nback_data2$Stimulus.ACC
+  subject_accuracy_eprime = nback_data$Stimulus.ACC
 
   #  -----------------------------------------------------------------------------------------------
 
@@ -51,7 +48,7 @@ analyze_nback_subject <- function(subject_path)
       first_condition_onset_time_eprime = this_condition_onset_time_eprime
       this_condition_onset_time_corrected = 4.5
     } else {
-      this_condition_onset_time_corrected = ((as.numeric(this_condition_onset_time_eprime) - as.numeric(first_condition_onset_time_eprime)) / 1000) + 4.5
+      this_condition_onset_time_corrected = ((as.numeric(this_condition_onset_time_eprime) - as.numeric(first_condition_onset_time_eprime))) + 4500
     }
 
     condition_onset_times_corrected = append(condition_onset_times_corrected, this_condition_onset_time_corrected)
@@ -65,11 +62,12 @@ analyze_nback_subject <- function(subject_path)
       subject_response_this_condition <- subject_response[this_condition_stim_indices]
       if (is.na(any(subject_response_this_condition==1))){
         noresponse_condition_indices <- append(noresponse_condition_indices, this_condition_stim_indices)
-    }
+      }
+
   }
 
   # TO DO: what to do if subject responded when a response was NOT expected ... for now ignoring erroneous repsonses.. only interested in respond to expected or not
-  # TO DO: what happens if response triggers on next stimulus?/ reaction time is really low?
+  # TO DO: what happens if response triggers on next stimulus?/ reaction time is really low? Check response in the MASK!!
 
   # # subject response accuracy # #
   # produces a logical array indicating whether the subject responded when expected, or not
@@ -83,14 +81,14 @@ analyze_nback_subject <- function(subject_path)
   accuracy_dataframe_nona = data.frame(nback_level[accuracy_na_indices_removed], subject_accuracy_r[accuracy_na_indices_removed], interstimulus_interval[accuracy_na_indices_removed])
 
   zero_back_short_indices = which(accuracy_dataframe_nona$interstimulus_interval == 500 & accuracy_dataframe_nona$nback_level == 0)
-  one_back_short_indices = which(accuracy_dataframe_nona$interstimulus_interval==500 & accuracy_dataframe_nona$nback_level == 1)
-  two_back_short_indices = which(accuracy_dataframe_nona$interstimulus_interval==500 & accuracy_dataframe_nona$nback_level == 2)
-  three_back_short_indices = which(accuracy_dataframe_nona$interstimulus_interval==500 & accuracy_dataframe_nona$nback_level == 3)
+  one_back_short_indices = which(accuracy_dataframe_nona$interstimulus_interval == 500 & accuracy_dataframe_nona$nback_level == 1)
+  two_back_short_indices = which(accuracy_dataframe_nona$interstimulus_interval == 500 & accuracy_dataframe_nona$nback_level == 2)
+  three_back_short_indices = which(accuracy_dataframe_nona$interstimulus_interval == 500 & accuracy_dataframe_nona$nback_level == 3)
 
-  zero_back_long_indices = which(accuracy_dataframe_nona$interstimulus_interval==1500 & accuracy_dataframe_nona$nback_level == 0)
-  one_back_long_indices = which(accuracy_dataframe_nona$interstimulus_interval==1500 & accuracy_dataframe_nona$nback_level == 1)
-  two_back_long_indices = which(accuracy_dataframe_nona$interstimulus_interval==1500 & accuracy_dataframe_nona$nback_level == 2)
-  three_back_long_indices = which(accuracy_dataframe_nona$interstimulus_interval==1500 & accuracy_dataframe_nona$nback_level == 3)
+  zero_back_long_indices = which(accuracy_dataframe_nona$interstimulus_interval == 1500 & accuracy_dataframe_nona$nback_level == 0)
+  one_back_long_indices = which(accuracy_dataframe_nona$interstimulus_interval == 1500 & accuracy_dataframe_nona$nback_level == 1)
+  two_back_long_indices = which(accuracy_dataframe_nona$interstimulus_interval == 1500 & accuracy_dataframe_nona$nback_level == 2)
+  three_back_long_indices = which(accuracy_dataframe_nona$interstimulus_interval == 1500 & accuracy_dataframe_nona$nback_level == 3)
 
   zero_back_short_accuracy = accuracy_dataframe_nona$subject_accuracy_r[zero_back_short_indices]
   one_back_short_accuracy = accuracy_dataframe_nona$subject_accuracy_r[one_back_short_indices]
