@@ -39,14 +39,14 @@ analyze_nback_subject <- function(subject_path)
     this_condition_first_stim_index = min(which(nback_block_labels == this_condition))
     this_condition_onset_time_eprime = stimulus_onset_times[this_condition_first_stim_index]
 
-    # reset the time correction every 8 conditions (this makes up a run)
+    # reset the time correction every 8 conditions (this makes up a run (for fMRI))
     if (length(condition_onset_times_corrected)%%8 == 0 & length(condition_onset_times_corrected) >= 8){
       first_condition_onset_time_eprime <- vector()
     }
 
     if (length(first_condition_onset_time_eprime) == 0){
       first_condition_onset_time_eprime = this_condition_onset_time_eprime
-      this_condition_onset_time_corrected = 4.5
+      this_condition_onset_time_corrected = 4500
     } else {
       this_condition_onset_time_corrected = ((as.numeric(this_condition_onset_time_eprime) - as.numeric(first_condition_onset_time_eprime))) + 4500
     }
@@ -54,6 +54,12 @@ analyze_nback_subject <- function(subject_path)
     condition_onset_times_corrected = append(condition_onset_times_corrected, this_condition_onset_time_corrected)
   }
   condition_onset_info_dataframe = data.frame(condition_onset_times_corrected, unique_subtrials)
+
+
+
+  stimulus_onset_times_continuous_corrected = as.numeric(stimulus_onset_times) - as.numeric(stimulus_onset_times[1]) + 4500
+  stimulus_onset_info_dataframe = data.frame(stimulus_onset_times_continuous_corrected, nback_block_labels)
+
 
   # remove indices of condition where subject forgot which nback they were performing
   noresponse_condition_indices <- vector()
@@ -63,7 +69,6 @@ analyze_nback_subject <- function(subject_path)
       if (is.na(any(subject_response_this_condition==1))){
         noresponse_condition_indices <- append(noresponse_condition_indices, this_condition_stim_indices)
       }
-
   }
 
   # TO DO: what to do if subject responded when a response was NOT expected ... for now ignoring erroneous repsonses.. only interested in respond to expected or not
@@ -137,7 +142,7 @@ analyze_nback_subject <- function(subject_path)
   write.csv(responsetime_dataframe, file = file.path(subject_path, paste0("Processed/Nback_files/responseTime_", toString(subject_id),".csv")))
   write.csv(accuracy_dataframe_complete, file = file.path(subject_path, paste0("Processed/Nback_files/accuracy_", toString(subject_id),".csv")))
   write.csv(condition_onset_info_dataframe, file = file.path(subject_path, paste0("Processed/Nback_files/conditionOnset_", toString(subject_id),".csv")))
-
+  write.csv(stimulus_onset_info_dataframe, file = file.path(subject_path, paste0("Processed/Nback_files/stimulusnOnsetContinuous_", toString(subject_id),".csv")))
   #  -----------------------------------------------------------------------------------------------
 
   # # PLOT # #
