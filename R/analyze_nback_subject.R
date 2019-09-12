@@ -6,6 +6,11 @@ analyze_nback_subject <- function(subject_path)
   library(ggplot2)
   library(rprime)
 
+  # TO DO:
+  # create /Processed/Nback_files which we were originally doing in fil_organize.sh
+  # creat {Subject_dir}/Figures
+
+
   # some funny stuff to be able to grab the subject ID for file naming
   subject_path_string_split = strsplit(subject_path,"/")[1][1]
   subject_id = vapply(subject_path_string_split, tail, "", 1)
