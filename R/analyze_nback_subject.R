@@ -9,6 +9,8 @@ analyze_nback_subject <- function(subject_path)
   # TO DO:
   # create /Processed/Nback_files which we were originally doing in fil_organize.sh
   # creat {Subject_dir}/Figures
+  # Change the read_excel to read .txt .. should be a function out there.
+  # Figure out the responses on the MASK
 
 
   # some funny stuff to be able to grab the subject ID for file naming
