@@ -17,14 +17,16 @@ analyze_nback_subject <- function(subject_path)
   # need way to ensure this is with respect to subject_dir
   setwd(subject_id) # paste0("/",toString(
   dir.create("Figures")
-  dir.create("Processed/Nback_files")
+  dir.create("Processed")
+  setwd("Processed")
+  dir.create("Nback_files")
 
+  setwd("..")
   setwd("..")
   # Grabbing bits and pieces of larger .xlsx file
   nback_data = read_excel(file.path(subject_path,"Raw/Nback_files/nback_results.xlsx"), cell_rows(2:450), sheet = 1, col_types = "text")
 
-
-  interstimulus_interval = nback_data$ISI
+  # need to find all Stimulus Conditions
 
   stimulus_onset_times = nback_data$Stimulus.OnsetTime
 
@@ -36,8 +38,21 @@ analyze_nback_subject <- function(subject_path)
   nback_level = stri_sub(nback_block_labels, -1,-1)
   nback_level = as.numeric(nback_level)
 
+  nback_interval = stri_sub(nback_block_labels, 1, 1)
+  interstimulus_interval[nback_interval == "S"] <- 500
+  interstimulus_interval[nback_interval == "L"] <- 1500
+
   subject_accuracy_eprime = nback_data$Stimulus.ACC
 
+  # REMOVE NAs (in the case of FNIRS data)
+  stimulus_onset_times <- stimulus_onset_times[!is.na(stimulus_onset_times)]
+  expected_correct_response <- expected_correct_response[!is.na(expected_correct_response)]
+  subject_response <- subject_response[!is.na(subject_response)]
+  subject_response_onset <- subject_response_onset[!is.na(subject_response_onset)]
+  nback_block_labels <- nback_block_labels[!is.na(nback_block_labels)]
+  nback_level <- nback_level[!is.na(nback_level)]
+  interstimulus_interval <- interstimulus_interval[!is.na(interstimulus_interval)]
+  subject_accuracy_eprime <- subject_accuracy_eprime[!is.na(subject_accuracy_eprime)]
   #  -----------------------------------------------------------------------------------------------
 
   # # ORGANIZE # #
