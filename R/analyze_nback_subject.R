@@ -7,18 +7,22 @@ analyze_nback_subject <- function(subject_path)
   library(rprime)
 
   # TO DO:
-  # create /Processed/Nback_files which we were originally doing in fil_organize.sh
-  # creat {Subject_dir}/Figures
   # Change the read_excel to read .txt .. should be a function out there.
   # Figure out the responses on the MASK
-
 
   # some funny stuff to be able to grab the subject ID for file naming
   subject_path_string_split = strsplit(subject_path,"/")[1][1]
   subject_id = vapply(subject_path_string_split, tail, "", 1)
 
+  # need way to ensure this is with respect to subject_dir
+  setwd(subject_id) # paste0("/",toString(
+  dir.create("Figures")
+  dir.create("Processed/Nback_files")
+
+  setwd("..")
   # Grabbing bits and pieces of larger .xlsx file
   nback_data = read_excel(file.path(subject_path,"Raw/Nback_files/nback_results.xlsx"), cell_rows(2:450), sheet = 1, col_types = "text")
+
 
   interstimulus_interval = nback_data$ISI
 
