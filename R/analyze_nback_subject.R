@@ -20,19 +20,10 @@ analyze_nback_subject <- function(subject_path)
   dir.create("Processed")
   setwd("Processed")
   dir.create("Nback_files")
-
   setwd("..")
   setwd("..")
   # Grabbing bits and pieces of larger .xlsx file
   nback_data = read_excel(file.path(subject_path,"Raw/Nback_files/nback_results.xlsx"), cell_rows(2:450), sheet = 1, col_types = "text")
-
-  # need to find all Stimulus Conditions
-
-  stimulus_onset_times = nback_data$Stimulus.OnsetTime
-
-  expected_correct_response = nback_data$Stimulus.CRESP
-  subject_response = nback_data$Stimulus.RESP
-  subject_response_onset = nback_data$Stimulus.RT
 
   nback_block_labels = nback_data$`Running[SubTrial]`
   nback_level = stri_sub(nback_block_labels, -1,-1)
@@ -43,16 +34,72 @@ analyze_nback_subject <- function(subject_path)
   interstimulus_interval[nback_interval == "L"] <- 1500
 
   subject_accuracy_eprime = nback_data$Stimulus.ACC
+  stimulus_onset_times = nback_data$Stimulus.OnsetTime
+  expected_correct_response = nback_data$Stimulus.CRESP
+  subject_response = nback_data$Stimulus.RESP
+  subject_response_onset = nback_data$Stimulus.RT
 
-  # REMOVE NAs (in the case of FNIRS data)
-  stimulus_onset_times <- stimulus_onset_times[!is.na(stimulus_onset_times)]
-  expected_correct_response <- expected_correct_response[!is.na(expected_correct_response)]
-  subject_response <- subject_response[!is.na(subject_response)]
-  subject_response_onset <- subject_response_onset[!is.na(subject_response_onset)]
-  nback_block_labels <- nback_block_labels[!is.na(nback_block_labels)]
-  nback_level <- nback_level[!is.na(nback_level)]
-  interstimulus_interval <- interstimulus_interval[!is.na(interstimulus_interval)]
-  subject_accuracy_eprime <- subject_accuracy_eprime[!is.na(subject_accuracy_eprime)]
+  # check if data coming form Stimulus is same length as other data.. if not.. do below.. (bug in FNIRS program)
+  total_number_of_stimuli_this_experiment <- nback_level[!is.na(nback_level)]
+  number_of_stimuli_in_stimulus_var <- subject_accuracy_eprime[!is.na(subject_accuracy_eprime)]
+  if (length(total_number_of_stimuli_this_experiment) > length(number_of_stimuli_in_stimulus_var))
+  {
+
+    subject_accuracy_eprime1 = nback_data$Stimulus1.ACC
+    stimulus_onset_times1 = nback_data$Stimulus1.OnsetTime
+    expected_correct_response1 = nback_data$Stimulus1.CRESP
+    subject_response1 = nback_data$Stimulus1.RESP
+    subject_response_onset1 = nback_data$Stimulus1.RT
+
+    indices_to_replace1 = which(subject_accuracy_eprime1 != "NA")
+
+    subject_accuracy_eprime[indices_to_replace1] = subject_accuracy_eprime1[indices_to_replace1]
+    stimulus_onset_times[indices_to_replace1] = stimulus_onset_times1[indices_to_replace1]
+    expected_correct_response[indices_to_replace1] = expected_correct_response1[indices_to_replace1]
+    subject_response[indices_to_replace1] = subject_response1[indices_to_replace1]
+    subject_response_onset[indices_to_replace1] = subject_response_onset1[indices_to_replace1]
+
+    subject_accuracy_eprime2 = nback_data$Stimulus2.ACC
+    stimulus_onset_times2 = nback_data$Stimulus2.OnsetTime
+    expected_correct_response2 = nback_data$Stimulus2.CRESP
+    subject_response2 = nback_data$Stimulus2.RESP
+    subject_response_onset2 = nback_data$Stimulus2.RT
+
+    indices_to_replace2 = which(subject_accuracy_eprime2 != "NA")
+
+    subject_accuracy_eprime[indices_to_replace2] = subject_accuracy_eprime2[indices_to_replace2]
+    stimulus_onset_times[indices_to_replace2] = stimulus_onset_times2[indices_to_replace2]
+    expected_correct_response[indices_to_replace2] = expected_correct_response2[indices_to_replace2]
+    subject_response[indices_to_replace2] = subject_response2[indices_to_replace2]
+    subject_response_onset[indices_to_replace2] = subject_response_onset2[indices_to_replace2]
+
+
+    subject_accuracy_eprime3 = nback_data$Stimulus3.ACC
+    stimulus_onset_times3 = nback_data$Stimulus3.OnsetTime
+    expected_correct_response3 = nback_data$Stimulus3.CRESP
+    subject_response3 = nback_data$Stimulus3.RESP
+    subject_response_onset3 = nback_data$Stimulus3.RT
+
+    indices_to_replace3 = which(subject_accuracy_eprime3 != "NA")
+
+    subject_accuracy_eprime[indices_to_replace3] = subject_accuracy_eprime3[indices_to_replace3]
+    stimulus_onset_times[indices_to_replace3] = stimulus_onset_times3[indices_to_replace3]
+    expected_correct_response[indices_to_replace3] = expected_correct_response2[indices_to_replace3]
+    subject_response[indices_to_replace3] = subject_response3[indices_to_replace3]
+    subject_response_onset[indices_to_replace3] = subject_response_onset3[indices_to_replace3]
+
+  }
+
+  # Just removing excess indices in the case of FNIRS data
+  indices_to_keep = which(!is.na(nback_level))
+  stimulus_onset_times <- stimulus_onset_times[indices_to_keep]
+  expected_correct_response <- expected_correct_response[indices_to_keep]
+  subject_response <- subject_response[indices_to_keep]
+  subject_response_onset <- subject_response_onset[indices_to_keep]
+  nback_block_labels <- nback_block_labels[indices_to_keep]
+  nback_level <- nback_level[indices_to_keep]
+  interstimulus_interval <- interstimulus_interval[indices_to_keep]
+  subject_accuracy_eprime <- subject_accuracy_eprime[indices_to_keep]
   #  -----------------------------------------------------------------------------------------------
 
   # # ORGANIZE # #
