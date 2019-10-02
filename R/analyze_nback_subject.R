@@ -179,12 +179,38 @@ analyze_nback_subject <- function(subject_path)
   indices_actual_late = which(!is.na(actual_late_response))
   indices_suspected_late = which(!is.na(subject_response_late))
 
+
+
   false_fires = setdiff(indices_suspected_late,indices_actual_late)
 
 
   subject_response[indices_actual_late] = "1"
 
   subject_response_onset[indices_actual_late] = subject_response_onset_late[indices_actual_late]
+
+
+
+  # # subject response accuracy # #
+  # produces a logical array indicating whether the subject responded when expected, or not
+  #subject_accuracy_r_eprime = subject_accuracy_eprime == expected_correct_response
+  #subject_accuracy_r = subject_response == expected_correct_response
+
+  expected_correct_response_padded = expected_correct_response
+  na_indices= which(is.na(expected_correct_response_padded))
+  expected_correct_response_padded[na_indices] = 0
+
+  subject_response_padded = subject_response
+  na_indices= which(is.na(subject_response_padded))
+  subject_response_padded[na_indices] = 0
+
+  indices_response = which(subject_response_padded == "1")
+  indices_expected = which(expected_correct_response_padded == "1")
+
+  false_fires <- append(false_fires, setdiff(indices_response,indices_expected))
+
+  subject_accuracy_r_logical = subject_response_padded == expected_correct_response_padded
+  subject_accuracy_r = subject_accuracy_r_logical * 1
+
 
 
   #  -----------------------------------------------------------------------------------------------------------------------
@@ -202,25 +228,6 @@ analyze_nback_subject <- function(subject_path)
       }
   }
 
-
-  # # subject response accuracy # #
-  # produces a logical array indicating whether the subject responded when expected, or not
-  #subject_accuracy_r_eprime = subject_accuracy_eprime == expected_correct_response
-  #subject_accuracy_r = subject_response == expected_correct_response
-
-  expected_correct_response_padded = expected_correct_response
-  na_indices= which(is.na(expected_correct_response_padded))
-  expected_correct_response_padded[na_indices] = 0
-
-  subject_response_padded = subject_response
-  na_indices= which(is.na(subject_response_padded))
-  subject_response_padded[na_indices] = 0
-
-  subject_accuracy_r_logical = subject_response_padded == expected_correct_response_padded
-  subject_accuracy_r = subject_accuracy_r_logical * 1
-
-
-
   # find only the indices where an expected response was expected and remove the subtrials where subject forgot which nback they were on
   accuracy_na_indices_removed = which(!is.na(subject_accuracy_r))
   accuracy_na_indices_removed = accuracy_na_indices_removed [!accuracy_na_indices_removed %in% noresponse_condition_indices]
@@ -237,15 +244,6 @@ analyze_nback_subject <- function(subject_path)
   one_back_long_indices = which(accuracy_dataframe_nona$interstimulus_interval == 1500 & accuracy_dataframe_nona$nback_level == 1)
   two_back_long_indices = which(accuracy_dataframe_nona$interstimulus_interval == 1500 & accuracy_dataframe_nona$nback_level == 2)
   three_back_long_indices = which(accuracy_dataframe_nona$interstimulus_interval == 1500 & accuracy_dataframe_nona$nback_level == 3)
-
-  length(zero_back_short_indices)
-  length(one_back_short_indices)
-  length(two_back_short_indices)
-  length(three_back_short_indices)
-  length(zero_back_long_indices)
-  length(one_back_long_indices)
-  length(two_back_long_indices)
-  length(three_back_long_indices)
 
   zero_back_short_accuracy = accuracy_dataframe_nona$subject_accuracy_r[zero_back_short_indices]
   one_back_short_accuracy = accuracy_dataframe_nona$subject_accuracy_r[one_back_short_indices]
@@ -323,6 +321,7 @@ analyze_nback_subject <- function(subject_path)
   write.csv(accuracy_dataframe_complete, file = file.path(subject_path, paste0("Processed/Nback_files/accuracy_", toString(subject_id),".csv")))
   write.csv(condition_onset_info_dataframe, file = file.path(subject_path, paste0("Processed/Nback_files/conditionOnset_", toString(subject_id),".csv")))
   write.csv(stimulus_onset_info_dataframe, file = file.path(subject_path, paste0("Processed/Nback_files/stimulusnOnsetContinuous_", toString(subject_id),".csv")))
+  write.csv(false_fires, file = file.path(subject_path, paste0("Processed/Nback_files/falsefires_", toString(subject_id),".csv")))
   #  -----------------------------------------------------------------------------------------------
 
   # # PLOT # #
