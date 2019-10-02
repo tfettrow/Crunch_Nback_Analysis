@@ -40,12 +40,60 @@ analyze_nback_subject <- function(subject_path)
   subject_response = nback_data$Stimulus.RESP
   subject_response_onset = nback_data$Stimulus.RT
 
-  # check if data coming form Stimulus is same length as other data.. if not.. do below.. (bug in FNIRS program)
+  subject_response_SMask = nback_data$SMask.RESP
+  subject_response_onset_SMask = nback_data$SMask.RT
+  subject_response_LMask = nback_data$LMask.RESP
+  subject_response_onset_LMask = nback_data$LMask.RT
+
+  indices_to_extract_from_SMask = which(subject_response_onset_SMask != "NA")
+  indices_to_extract_from_LMask = which(subject_response_onset_LMask != "NA")
+  subject_response_late = subject_response
+  subject_response_onset_late = subject_response_onset
+  subject_response_late[indices_to_extract_from_SMask] = subject_response_SMask[indices_to_extract_from_SMask]
+  subject_response_onset_late[indices_to_extract_from_SMask] = subject_responset_onset_SMask[indices_to_extract_from_SMask]
+  subject_response_late[indices_to_extract_from_LMask] = subject_response_LMask[indices_to_extract_from_LMask]
+  subject_response_onset_late[indices_to_extract_from_LMask] = subject_responset_onset_LMask[indices_to_extract_from_LMask]
+
   total_number_of_stimuli_this_experiment <- nback_level[!is.na(nback_level)]
   number_of_stimuli_in_stimulus_var <- subject_accuracy_eprime[!is.na(subject_accuracy_eprime)]
+
+  #  -----------------------------------------------------------------------------------------------------------------------
+
+  # Fixing some FNIRS eprime bugs
+  if (length(total_number_of_stimuli_this_experiment) > length(which(subject_response_onset_late!="NA")))
+  {
+    subject_response_SMask1 = nback_data$SMask1.RESP
+    subject_response_onset_SMask1 = nback_data$SMask1.RT
+
+    subject_response_LMask1 = nback_data$LMask1.RESP
+    subject_response_onset_LMask1 = nback_data$LMask1.RT
+
+    subject_response_LMask2 = nback_data$LMask2.RESP
+    subject_response_onset_LMask2 = nback_data$LMask2.RT
+
+
+    indices_to_extract_from_SMask1 = which(subject_response_onset_SMask1 != "NA")
+    indices_to_extract_from_LMask1 = which(subject_response_onset_LMask1 != "NA")
+    indices_to_extract_from_LMask2 = which(subject_response_onset_LMask2 != "NA")
+
+    subject_response_late[indices_to_extract_from_SMask1] = subject_response_SMask1[indices_to_extract_from_SMask1]
+    subject_response_onset_late[indices_to_extract_from_SMask1] = subject_response_onset_SMask1[indices_to_extract_from_SMask1]
+
+    subject_response_late[indices_to_extract_from_LMask1] = subject_response_LMask1[indices_to_extract_from_LMask1]
+    subject_response_onset_late[indices_to_extract_from_LMask1] = subject_response_onset_LMask1[indices_to_extract_from_LMask1]
+
+    subject_response_late[indices_to_extract_from_LMask2] = subject_response_LMask2[indices_to_extract_from_LMask2]
+    subject_response_onset_late[indices_to_extract_from_LMask2] = subject_response_onset_LMask2[indices_to_extract_from_LMask2]
+
+  }
+
+
+  #  -----------------------------------------------------------------------------------------------------------------------
+  # Fixing some FNIRS eprime bugs
+
+  # check if data coming form Stimulus is same length as other data.. if not.. do below.. (bug in FNIRS program)
   if (length(total_number_of_stimuli_this_experiment) > length(number_of_stimuli_in_stimulus_var))
   {
-
     subject_accuracy_eprime1 = nback_data$Stimulus1.ACC
     stimulus_onset_times1 = nback_data$Stimulus1.OnsetTime
     expected_correct_response1 = nback_data$Stimulus1.CRESP
@@ -93,6 +141,7 @@ analyze_nback_subject <- function(subject_path)
 
   # Just removing excess indices in the case of FNIRS data
   indices_to_keep = which(!is.na(nback_level))
+
   stimulus_onset_times <- stimulus_onset_times[indices_to_keep]
   expected_correct_response <- expected_correct_response[indices_to_keep]
   subject_response <- subject_response[indices_to_keep]
@@ -101,41 +150,49 @@ analyze_nback_subject <- function(subject_path)
   nback_level <- nback_level[indices_to_keep]
   interstimulus_interval <- interstimulus_interval[indices_to_keep]
   subject_accuracy_eprime <- subject_accuracy_eprime[indices_to_keep]
-  #  -----------------------------------------------------------------------------------------------
+  subject_response_onset_late <- subject_response_onset_late[indices_to_keep]
+  subject_response_late <- subject_response_late[indices_to_keep]
+
+  #  -----------------------------------------------------------------------------------------------------------------------
+  # # check if subject responded in mask and populate accordingly # #
+  # # if subject responded in Mask (late) and not directly after a stimulus then classify this as false-fire # #
+
+  # for each expected response
+  # check whether there is a subject response at that index,
+  # if not, check subject_response_late for following index,
+  # if exists, assign this to subject response and add 500 to the RT
+  # keep track of indices that are actually late responses and grab late responses that were not responses.. classify these as false-fires
+
+  indices_to_check = which(expected_correct_response == "1")
+  actual_late_response = array(data=NA,length(expected_correct_response))
+  for (this_index in indices_to_check)
+    {
+      if (is.na(subject_response[this_index]))
+      {
+        if (!is.na(subject_response_late[this_index]))
+        {
+          actual_late_response[this_index] = "1"
+        }
+      }
+  }
+
+  indices_actual_late = which(!is.na(actual_late_response))
+  indices_suspected_late = which(!is.na(subject_response_late))
+
+  false_fires = setdiff(indices_suspected_late,indices_actual_late)
+
+
+  subject_response[indices_actual_late] = "1"
+
+  subject_response_onset[indices_actual_late] = subject_response_onset_late[indices_actual_late]
+
+
+  #  -----------------------------------------------------------------------------------------------------------------------
 
   # # ORGANIZE # #
 
-  # determine the onset time of each condition
-  unique_subtrials = unique(nback_block_labels)
-  condition_onset_times_corrected <- vector()
-  first_condition_onset_time_eprime <- vector()
-  for (this_condition in unique_subtrials){
-    this_condition_first_stim_index = min(which(nback_block_labels == this_condition))
-    this_condition_onset_time_eprime = stimulus_onset_times[this_condition_first_stim_index]
-
-    # reset the time correction every 8 conditions (this makes up a run (for fMRI))
-    if (length(condition_onset_times_corrected)%%8 == 0 & length(condition_onset_times_corrected) >= 8){
-      first_condition_onset_time_eprime <- vector()
-    }
-
-    if (length(first_condition_onset_time_eprime) == 0){
-      first_condition_onset_time_eprime = this_condition_onset_time_eprime
-      this_condition_onset_time_corrected = 4500
-    } else {
-      this_condition_onset_time_corrected = ((as.numeric(this_condition_onset_time_eprime) - as.numeric(first_condition_onset_time_eprime))) + 4500
-    }
-
-    condition_onset_times_corrected = append(condition_onset_times_corrected, this_condition_onset_time_corrected)
-  }
-  condition_onset_info_dataframe = data.frame(condition_onset_times_corrected, unique_subtrials)
-
-
-
-  stimulus_onset_times_continuous_corrected = as.numeric(stimulus_onset_times) - as.numeric(stimulus_onset_times[1]) + 4500
-  stimulus_onset_info_dataframe = data.frame(stimulus_onset_times_continuous_corrected, nback_block_labels)
-
-
   # remove indices of condition where subject forgot which nback they were performing
+  unique_subtrials = unique(nback_block_labels)
   noresponse_condition_indices <- vector()
   for (this_condition in unique_subtrials){
       this_condition_stim_indices = (which(nback_block_labels == this_condition))
@@ -145,12 +202,24 @@ analyze_nback_subject <- function(subject_path)
       }
   }
 
-  # TO DO: what to do if subject responded when a response was NOT expected ... for now ignoring erroneous repsonses.. only interested in respond to expected or not
-  # TO DO: what happens if response triggers on next stimulus?/ reaction time is really low? Check response in the MASK!!
 
   # # subject response accuracy # #
   # produces a logical array indicating whether the subject responded when expected, or not
-  subject_accuracy_r = subject_accuracy_eprime == expected_correct_response
+  #subject_accuracy_r_eprime = subject_accuracy_eprime == expected_correct_response
+  #subject_accuracy_r = subject_response == expected_correct_response
+
+  expected_correct_response_padded = expected_correct_response
+  na_indices= which(is.na(expected_correct_response_padded))
+  expected_correct_response_padded[na_indices] = 0
+
+  subject_response_padded = subject_response
+  na_indices= which(is.na(subject_response_padded))
+  subject_response_padded[na_indices] = 0
+
+  subject_accuracy_r_logical = subject_response_padded == expected_correct_response_padded
+  subject_accuracy_r = subject_accuracy_r_logical * 1
+
+
 
   # find only the indices where an expected response was expected and remove the subtrials where subject forgot which nback they were on
   accuracy_na_indices_removed = which(!is.na(subject_accuracy_r))
@@ -168,6 +237,15 @@ analyze_nback_subject <- function(subject_path)
   one_back_long_indices = which(accuracy_dataframe_nona$interstimulus_interval == 1500 & accuracy_dataframe_nona$nback_level == 1)
   two_back_long_indices = which(accuracy_dataframe_nona$interstimulus_interval == 1500 & accuracy_dataframe_nona$nback_level == 2)
   three_back_long_indices = which(accuracy_dataframe_nona$interstimulus_interval == 1500 & accuracy_dataframe_nona$nback_level == 3)
+
+  length(zero_back_short_indices)
+  length(one_back_short_indices)
+  length(two_back_short_indices)
+  length(three_back_short_indices)
+  length(zero_back_long_indices)
+  length(one_back_long_indices)
+  length(two_back_long_indices)
+  length(three_back_long_indices)
 
   zero_back_short_accuracy = accuracy_dataframe_nona$subject_accuracy_r[zero_back_short_indices]
   one_back_short_accuracy = accuracy_dataframe_nona$subject_accuracy_r[one_back_short_indices]
@@ -208,8 +286,36 @@ analyze_nback_subject <- function(subject_path)
 
   responsetime_dataframe = data.frame(nback_level_correct, subject_response_onset_correct, interstimulus_interval_correct, subject_id)
 
-  #  -----------------------------------------------------------------------------------------------
+  #  -----------------------------------------------------------------------------------------------------------------------
+  # # create condition onset arrays # #
 
+  # determine the onset time of each condition
+  condition_onset_times_corrected <- vector()
+  first_condition_onset_time_eprime <- vector()
+  for (this_condition in unique_subtrials){
+    this_condition_first_stim_index = min(which(nback_block_labels == this_condition))
+    this_condition_onset_time_eprime = stimulus_onset_times[this_condition_first_stim_index]
+
+    # reset the time correction every 8 conditions (this makes up a run (for fMRI))
+    if (length(condition_onset_times_corrected)%%8 == 0 & length(condition_onset_times_corrected) >= 8){
+      first_condition_onset_time_eprime <- vector()
+    }
+
+    if (length(first_condition_onset_time_eprime) == 0){
+      first_condition_onset_time_eprime = this_condition_onset_time_eprime
+      this_condition_onset_time_corrected = 4500
+    } else {
+      this_condition_onset_time_corrected = ((as.numeric(this_condition_onset_time_eprime) - as.numeric(first_condition_onset_time_eprime))) + 4500
+    }
+
+    condition_onset_times_corrected = append(condition_onset_times_corrected, this_condition_onset_time_corrected)
+  }
+  condition_onset_info_dataframe = data.frame(condition_onset_times_corrected, unique_subtrials)
+
+  stimulus_onset_times_continuous_corrected = as.numeric(stimulus_onset_times) - as.numeric(stimulus_onset_times[1]) + 4500
+  stimulus_onset_info_dataframe = data.frame(stimulus_onset_times_continuous_corrected, nback_block_labels)
+
+  #  -----------------------------------------------------------------------------------------------=
   # # WRITE DATA OF INTEREST TO FILE # #
 
   # # Store Data in Processed folder # #
@@ -254,7 +360,6 @@ analyze_nback_subject <- function(subject_path)
    # scale_fill_manual(values=c("orange","blue"))  + ggtitle("Subject Reaction Time for N-Back Levels and ISI") + xlab("N-Back Level") + ylab("Onset Time (ms)")
    # ggsave(file)
 
-  #  -----------------------------------------------------------------------------------------------
 
 }
 
