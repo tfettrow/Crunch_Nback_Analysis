@@ -30,7 +30,7 @@ analyze_nback_subject <- function(subject_path)
   nback_level = as.numeric(nback_level)
 
   nback_interval = stri_sub(nback_block_labels, 1, 1)
-  interstimulus_interval = nback_interval # just a place holder for interstimulus_interval
+  interstimulus_interval = array(data=NA,length(nback_interval))
   interstimulus_interval[nback_interval == "S"] <- 500
   interstimulus_interval[nback_interval == "L"] <- 1500
 
@@ -47,12 +47,14 @@ analyze_nback_subject <- function(subject_path)
 
   indices_to_extract_from_SMask = which(subject_response_onset_SMask != "NA")
   indices_to_extract_from_LMask = which(subject_response_onset_LMask != "NA")
-  subject_response_late = subject_response
-  subject_response_onset_late = subject_response_onset
-  subject_response_late[indices_to_extract_from_SMask] = subject_response_SMask[indices_to_extract_from_SMask]
-  subject_response_onset_late[indices_to_extract_from_SMask] = subject_responset_onset_SMask[indices_to_extract_from_SMask]
-  subject_response_late[indices_to_extract_from_LMask] = subject_response_LMask[indices_to_extract_from_LMask]
-  subject_response_onset_late[indices_to_extract_from_LMask] = subject_responset_onset_LMask[indices_to_extract_from_LMask]
+
+  subject_response_suspected_late = array(data=NA,length(subject_response))
+  subject_response_onset_suspected_late = array(data=NA,length(subject_response_onset))
+
+  subject_response_suspected_late[indices_to_extract_from_SMask] = subject_response_SMask[indices_to_extract_from_SMask]
+  subject_response_onset_suspected_late[indices_to_extract_from_SMask] = subject_response_onset_SMask[indices_to_extract_from_SMask]
+  subject_response_suspected_late[indices_to_extract_from_LMask] = subject_response_LMask[indices_to_extract_from_LMask]
+  subject_response_onset_suspected_late[indices_to_extract_from_LMask] = subject_response_onset_LMask[indices_to_extract_from_LMask]
 
   total_number_of_stimuli_this_experiment <- nback_level[!is.na(nback_level)]
   number_of_stimuli_in_stimulus_var <- subject_accuracy_eprime[!is.na(subject_accuracy_eprime)]
@@ -60,7 +62,7 @@ analyze_nback_subject <- function(subject_path)
   #  -----------------------------------------------------------------------------------------------------------------------
 
   # Fixing some FNIRS eprime bugs
-  if (length(total_number_of_stimuli_this_experiment) > length(which(subject_response_onset_late!="NA")))
+  if (length(total_number_of_stimuli_this_experiment) > length(which(subject_response_onset_suspected_late!="NA")))
   {
     subject_response_SMask1 = nback_data$SMask1.RESP
     subject_response_onset_SMask1 = nback_data$SMask1.RT
@@ -76,14 +78,14 @@ analyze_nback_subject <- function(subject_path)
     indices_to_extract_from_LMask1 = which(subject_response_onset_LMask1 != "NA")
     indices_to_extract_from_LMask2 = which(subject_response_onset_LMask2 != "NA")
 
-    subject_response_late[indices_to_extract_from_SMask1] = subject_response_SMask1[indices_to_extract_from_SMask1]
-    subject_response_onset_late[indices_to_extract_from_SMask1] = subject_response_onset_SMask1[indices_to_extract_from_SMask1]
+    subject_response_suspected_late[indices_to_extract_from_SMask1] = subject_response_SMask1[indices_to_extract_from_SMask1]
+    subject_response_onset_suspected_late[indices_to_extract_from_SMask1] = subject_response_onset_SMask1[indices_to_extract_from_SMask1]
 
-    subject_response_late[indices_to_extract_from_LMask1] = subject_response_LMask1[indices_to_extract_from_LMask1]
-    subject_response_onset_late[indices_to_extract_from_LMask1] = subject_response_onset_LMask1[indices_to_extract_from_LMask1]
+    subject_response_suspected_late[indices_to_extract_from_LMask1] = subject_response_LMask1[indices_to_extract_from_LMask1]
+    subject_response_onset_suspected_late[indices_to_extract_from_LMask1] = subject_response_onset_LMask1[indices_to_extract_from_LMask1]
 
-    subject_response_late[indices_to_extract_from_LMask2] = subject_response_LMask2[indices_to_extract_from_LMask2]
-    subject_response_onset_late[indices_to_extract_from_LMask2] = subject_response_onset_LMask2[indices_to_extract_from_LMask2]
+    subject_response_suspected_late[indices_to_extract_from_LMask2] = subject_response_LMask2[indices_to_extract_from_LMask2]
+    subject_response_onset_suspected_late[indices_to_extract_from_LMask2] = subject_response_onset_LMask2[indices_to_extract_from_LMask2]
 
   }
 
@@ -150,8 +152,8 @@ analyze_nback_subject <- function(subject_path)
   nback_level <- nback_level[indices_to_keep]
   interstimulus_interval <- interstimulus_interval[indices_to_keep]
   subject_accuracy_eprime <- subject_accuracy_eprime[indices_to_keep]
-  subject_response_onset_late <- subject_response_onset_late[indices_to_keep]
-  subject_response_late <- subject_response_late[indices_to_keep]
+  subject_response_onset_suspected_late <- subject_response_onset_suspected_late[indices_to_keep]
+  subject_response_suspected_late <- subject_response_suspected_late[indices_to_keep]
 
   #  -----------------------------------------------------------------------------------------------------------------------
   # # check if subject responded in mask and populate accordingly # #
@@ -169,7 +171,7 @@ analyze_nback_subject <- function(subject_path)
     {
       if (is.na(subject_response[this_index]))
       {
-        if (!is.na(subject_response_late[this_index]))
+        if (!is.na(subject_response_suspected_late[this_index]))
         {
           actual_late_response[this_index] = "1"
         }
@@ -177,7 +179,7 @@ analyze_nback_subject <- function(subject_path)
   }
 
   indices_actual_late = which(!is.na(actual_late_response))
-  indices_suspected_late = which(!is.na(subject_response_late))
+  indices_suspected_late = which(!is.na(subject_response_suspected_late))
 
 
 
@@ -186,7 +188,7 @@ analyze_nback_subject <- function(subject_path)
 
   subject_response[indices_actual_late] = "1"
 
-  subject_response_onset[indices_actual_late] = subject_response_onset_late[indices_actual_late]
+  subject_response_onset[indices_actual_late] = subject_response_onset_suspected_late[indices_actual_late]
 
 
 
@@ -228,32 +230,32 @@ analyze_nback_subject <- function(subject_path)
       }
   }
 
-  # find only the indices where an expected response was expected and remove the subtrials where subject forgot which nback they were on
-  accuracy_na_indices_removed = which(!is.na(subject_accuracy_r))
-  accuracy_na_indices_removed = accuracy_na_indices_removed [!accuracy_na_indices_removed %in% noresponse_condition_indices]
-
   # convert accuracy into percent ... find a simpler method!
-  accuracy_dataframe_nona = data.frame(nback_level[accuracy_na_indices_removed], subject_accuracy_r[accuracy_na_indices_removed], interstimulus_interval[accuracy_na_indices_removed])
+  if (any(noresponse_condition_indices)){
+    accuracy_dataframe = data.frame(nback_level[-noresponse_condition_indices], subject_accuracy_r[-noresponse_condition_indices], interstimulus_interval[-noresponse_condition_indices])
+  } else{
+    accuracy_dataframe = data.frame(nback_level, subject_accuracy_r, interstimulus_interval)
+  }
 
-  zero_back_short_indices = which(accuracy_dataframe_nona$interstimulus_interval == 500 & accuracy_dataframe_nona$nback_level == 0)
-  one_back_short_indices = which(accuracy_dataframe_nona$interstimulus_interval == 500 & accuracy_dataframe_nona$nback_level == 1)
-  two_back_short_indices = which(accuracy_dataframe_nona$interstimulus_interval == 500 & accuracy_dataframe_nona$nback_level == 2)
-  three_back_short_indices = which(accuracy_dataframe_nona$interstimulus_interval == 500 & accuracy_dataframe_nona$nback_level == 3)
+  zero_back_short_indices = which(accuracy_dataframe$interstimulus_interval == 500 & accuracy_dataframe$nback_level == 0)
+  one_back_short_indices = which(accuracy_dataframe$interstimulus_interval == 500 & accuracy_dataframe$nback_level == 1)
+  two_back_short_indices = which(accuracy_dataframe$interstimulus_interval == 500 & accuracy_dataframe$nback_level == 2)
+  three_back_short_indices = which(accuracy_dataframe$interstimulus_interval == 500 & accuracy_dataframe$nback_level == 3)
 
-  zero_back_long_indices = which(accuracy_dataframe_nona$interstimulus_interval == 1500 & accuracy_dataframe_nona$nback_level == 0)
-  one_back_long_indices = which(accuracy_dataframe_nona$interstimulus_interval == 1500 & accuracy_dataframe_nona$nback_level == 1)
-  two_back_long_indices = which(accuracy_dataframe_nona$interstimulus_interval == 1500 & accuracy_dataframe_nona$nback_level == 2)
-  three_back_long_indices = which(accuracy_dataframe_nona$interstimulus_interval == 1500 & accuracy_dataframe_nona$nback_level == 3)
+  zero_back_long_indices = which(accuracy_dataframe$interstimulus_interval == 1500 & accuracy_dataframe$nback_level == 0)
+  one_back_long_indices = which(accuracy_dataframe$interstimulus_interval == 1500 & accuracy_dataframe$nback_level == 1)
+  two_back_long_indices = which(accuracy_dataframe$interstimulus_interval == 1500 & accuracy_dataframe$nback_level == 2)
+  three_back_long_indices = which(accuracy_dataframe$interstimulus_interval == 1500 & accuracy_dataframe$nback_level == 3)
 
-  zero_back_short_accuracy = accuracy_dataframe_nona$subject_accuracy_r[zero_back_short_indices]
-  one_back_short_accuracy = accuracy_dataframe_nona$subject_accuracy_r[one_back_short_indices]
-  two_back_short_accuracy = accuracy_dataframe_nona$subject_accuracy_r[two_back_short_indices]
-  three_back_short_accuracy = accuracy_dataframe_nona$subject_accuracy_r[three_back_short_indices]
+  zero_back_short_accuracy = accuracy_dataframe$subject_accuracy_r[zero_back_short_indices]
+  one_back_short_accuracy = accuracy_dataframe$subject_accuracy_r[one_back_short_indices]
+  two_back_short_accuracy = accuracy_dataframe$subject_accuracy_r[two_back_short_indices]
+  three_back_short_accuracy = accuracy_dataframe$subject_accuracy_r[three_back_short_indices]
 
-  zero_back_long_accuracy = accuracy_dataframe_nona$subject_accuracy_r[zero_back_long_indices]
-  one_back_long_accuracy = accuracy_dataframe_nona$subject_accuracy_r[one_back_long_indices]
-  two_back_long_accuracy = accuracy_dataframe_nona$subject_accuracy_r[two_back_long_indices]
-  three_back_long_accuracy = accuracy_dataframe_nona$subject_accuracy_r[three_back_long_indices]
+  zero_back_long_accuracy = accuracy_dataframe$subject_accuracy_r[zero_back_long_indices]
+  one_back_long_accuracy = accuracy_dataframe$subject_accuracy_r[one_back_long_indices]
+  two_back_long_accuracy = accuracy_dataframe$subject_accuracy_r[two_back_long_indices]
+  three_back_long_accuracy = accuracy_dataframe$subject_accuracy_r[three_back_long_indices]
 
   zero_back_short_accuracy_percent = sum(zero_back_short_accuracy) / length (zero_back_short_accuracy) * 100
   one_back_short_accuracy_percent = sum(one_back_short_accuracy) / length (one_back_short_accuracy) * 100
@@ -276,7 +278,10 @@ analyze_nback_subject <- function(subject_path)
   #response_correct_indices = expected_correct_response == correct_response_eprime
 
   subject_accuracy_r_numeric = as.numeric(subject_accuracy_r)
-  response_correct_indices = which(subject_accuracy_r_numeric == 1)
+  expected_correct_response_padded_numeric = as.numeric(expected_correct_response_padded)
+  subject_accurate_and_expected = as.numeric(subject_accuracy_r_numeric == expected_correct_response_padded_numeric)
+
+  response_correct_indices = which(subject_accurate_and_expected == 1)
 
   nback_level_correct = nback_level[response_correct_indices]
   subject_response_onset_correct = subject_response_onset[response_correct_indices]
@@ -359,6 +364,13 @@ analyze_nback_subject <- function(subject_path)
    # scale_fill_manual(values=c("orange","blue"))  + ggtitle("Subject Reaction Time for N-Back Levels and ISI") + xlab("N-Back Level") + ylab("Onset Time (ms)")
    # ggsave(file)
 
+  #data.frame(nback_level_correct, subject_response_onset_correct, interstimulus_interval_correct, subject_id)
 
+  #responsetime_file_name_jpeg = paste0("ResponseTime_",toString(subject_id),".jpeg")
+  #file = file.path(subject_path,"Figures", responsetime_file_name_jpeg)
+  #ggplot(responsetime_dataframe, aes(x = factor(nback_level_correct), y = subject_response_onset_correct)) + geom_violin(aes(fill = factor(interstimulus_interval_correct))) +
+  #  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"), legend.title = element_blank()) +
+  #  scale_fill_manual(values=c("orange","blue"))  + ggtitle("Reaction Time for N-Back Levels and ISI") + xlab("N-Back Level") + ylab("Onset Time (ms)")
+  #ggsave(file)
 }
 
