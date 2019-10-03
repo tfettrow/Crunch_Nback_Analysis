@@ -38,7 +38,7 @@ analyze_nback_group <- function(group_name, subject_paths)
   }
 
 
-  write.csv(all_accuracy_data, file = file.path("Young_Adults/Group_Results/Nback_files", paste0(toString(group_name), "_accuracy",".csv")))
+  write.csv(all_accuracy_data, file = file.path(group_name/"Group_Results/Nback_files", paste0(toString(group_name), "_accuracy",".csv")))
 
   write.csv(all_responseTime_data, file = file.path("Young_Adults/Group_Results/Nback_files", paste0(toString(group_name), "_responseTime",".csv")))
 
@@ -46,7 +46,7 @@ analyze_nback_group <- function(group_name, subject_paths)
   colnames(all_accuracy_data_averaged) <- c("ISI", "nback", "averaged_accuracy")
 
   accuracy_file_name_pdf = paste0(toString(group_name), "_Accuracy",".pdf")
-  file = file.path("Young_Adults/Group_Results/Figures", accuracy_file_name_pdf)
+  file = file.path(this_group_id)"/Group_Results/Figures", accuracy_file_name_pdf)
   accuracy_fig = ggplot(data=all_accuracy_data_averaged, aes(fill = ISI, x = nback, y=averaged_accuracy)) + geom_bar(position = "dodge", stat = "identity")
   accuracy_fig + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
                        panel.background = element_blank(), axis.line = element_line(colour = "black")) + ggtitle("Subject Accuracy for N-Back Levels and ISI") + xlab("N-Back Level") + ylab("Percent Correct (%)") +
