@@ -7,6 +7,9 @@ analyze_nback_subject <- function(subject_path)
   library(rprime)
   library(dplyr)
 
+  # TO DO
+  # confirm the file we are reading has the same subject code as specified in argument
+
   subject_path_string_split = strsplit(subject_path,"/")[1][1]
   subject_id = vapply(subject_path_string_split, tail, "", 1)
 
