@@ -35,7 +35,7 @@ analyze_nback_stats <- function(group_paths)
   }
 
 
-  #group_accuracy_data_averaged <- aggregate(accuracy_data["subject_accuracy"], by=list(accuracy_data$ISI, accuracy_data$nback),FUN=mean)
+  #group_accuracy_data_averaged <- aggregate(this_group_accuracy_data["this_group_accuracy_data"], by=list(accuracy_data$ISI, accuracy_data$nback),FUN=mean)
 
 }
 
@@ -43,10 +43,38 @@ analyze_nback_stats <- function(group_paths)
 TF_GUESS_MODEL <- lmer(subject_response_onset_correct ~ nback_level_correct + (1|subject_id), data=this_group_response_data)  ##obviously not emotion condition
 summary(TF_GUESS_MODEL)
 anova(TF_GUESS_MODEL)
+##  IDK, maybe its predcting accuracy by ISI?
+Accuracy_guess_model<- lmer(subject_accuracy ~ ISI + (1|subject_id), data=this_group_accuracy_data)  ##obviously not emotion condition
+summary(Accuracy_guess_model)
+anova(Accuracy_guess_model)
+##could it be predicting accuracy by nback level?
+Accuracy_guess_model2<- lmer(subject_accuracy ~ nback + (1|subject_id), data=this_group_accuracy_data)  ##obviously not emotion condition
+summary(Accuracy_guess_model2)
+anova(Accuracy_guess_model2)
 
 
 
-fit <- lmer(group_accracy_data ~ Emotion_Condition + (1|group_id), data=df)  ##obviously not emotion condition
-anova(fit)
 
-#comparisons between eachi individual groups?
+#doesnt seem to work, similar to 2
+#library(nlme)
+#anova.lme(Accuracy_guess_model3)
+#Accuracy_guess_model3 = lme(subject_accuracy ~ nback + (1|subject_id),
+#             random = ~1,
+#             data=this_group_accuracy_data,
+#             method="REML")
+
+
+library(multcompView)
+library(emmeans)
+
+#This is supposed to be an attempt at some post-hoc, additional comments are provided from the stats class, as was the code
+#
+#(leastsquare1b = lsmeans::lsmeans(Accuracy_guess_model2,
+#                                  pairwise ~ task*Condition,
+#                                  adjust="none") )      ###  Tukey-adjusted comparisons
+#leastsquare1b$contrasts
+#lsmeans adjust options include
+#"tukey", "scheffe", "sidak", "bonferroni", "dunnettx", "mvt", and "none"
+#These are tricky to look at, but they have the information we need
+#Some contrasts compare different treatments at pretest or at posttest
+#These will give us the equivalent of SPSS simple effects tables
