@@ -5,7 +5,7 @@ analyze_nback_subject <- function(subject_path)
   library(lattice)
   library(ggplot2)
   library(rprime)
-  library(RColorBrewer)
+  library(dplyr)
 
   subject_path_string_split = strsplit(subject_path,"/")[1][1]
   subject_id = vapply(subject_path_string_split, tail, "", 1)
@@ -22,11 +22,17 @@ analyze_nback_subject <- function(subject_path)
   study_path_split = strsplit(current_path,"/")[1][1]
   study_folder = vapply(study_path_split, tail, "", 1)
 
-  if (subject_id == "1012" & study_folder == "MiM_Data")
+  if ((subject_id == "1012" & subject_id == "1004") | study_folder == "MiM_Data")
     {
       nback_data1 = read_excel(file.path(subject_path,"Raw/Nback_files/nback_results_Trial1.xlsx"), cell_rows(2:450), sheet = 1, col_types = "text")
-      nback_data2 = read_excel(file.path(subject_path,"Raw/Nback_files/nback_results_Trial2.xlsx"), cell_rows(2:226), sheet = 1, col_types = "text")
-
+      if (subject_id == "1004")
+      {
+        nback_data2 = read_excel(file.path(subject_path,"Raw/Nback_files/nback_results_Trial2.xlsx"), cell_rows(2:114), sheet = 1, col_types = "text")
+      }
+      if (subject_id == "1012" )
+      {
+        nback_data2 = read_excel(file.path(subject_path,"Raw/Nback_files/nback_results_Trial2.xlsx"), cell_rows(2:226), sheet = 1, col_types = "text")
+      }
       nback_block_labels = nback_data1$`Running[SubTrial]`
 
       subject_accuracy_eprime = nback_data1$Stimulus.ACC
@@ -56,11 +62,23 @@ analyze_nback_subject <- function(subject_path)
       # for 1012 remove blocks 3 and 4 from data_1 and replace with data_2
       block_number_1 = stri_sub(nback_block_labels, 2, 2)
       block_number_2 = stri_sub(nback_block_labels_2, 2, 2)
-      block_number_2 = as.numeric(block_number_2) + 2
-      block_number_2 = as.character(block_number_2)
-      (stri_sub(nback_block_labels_2, 2, 2) <- as.character(block_number_2))
+
+
+      if (subject_id == "1004")
+      {
+        block_number_2 = as.numeric(block_number_2) + 3 # setting the block # to 4
+        block_number_2 = as.character(block_number_2)
+        (stri_sub(nback_block_labels_2, 2, 2) <- as.character(block_number_2))
+        indices_to_replace = which(is.na(block_number_1))
+      }
+      if (subject_id == "1012")
+      {
+        block_number_2 = as.numeric(block_number_2) + 2 # setting the block # to 3 and 4
+        block_number_2 = as.character(block_number_2)
+        (stri_sub(nback_block_labels_2, 2, 2) <- as.character(block_number_2))
+        indices_to_replace = which(block_number_1 == "3" | block_number_1 == "4")
+      }
       # find indices for blocks 3 and 4 in data_1
-      indices_to_replace = which(block_number_1 == "3" | block_number_1 == "4")
 
       nback_block_labels[indices_to_replace] = nback_block_labels_2
       subject_accuracy_eprime[indices_to_replace] = subject_accuracy_eprime_2
@@ -277,8 +295,9 @@ analyze_nback_subject <- function(subject_path)
   indices_response = which(subject_response_padded == "1")
   indices_expected = which(expected_correct_response_padded == "1")
 
-  false_fires_index <- append(false_fires_index, setdiff(indices_response,indices_expected))
-  false_fires_nback_level <- nback_level[false_fires_index]
+  false_fires_index <- unique(sort(append(false_fires_index, setdiff(indices_response,indices_expected))))
+  false_fires_nback_level <- as.character(nback_level[false_fires_index])
+  false_fires_isi <- interstimulus_interval[false_fires_index]
 
   # index correct responses for RT data frame
   nback_level_correct = nback_level[response_correct_indices]
@@ -286,7 +305,7 @@ analyze_nback_subject <- function(subject_path)
 
   # create data frames
   responsetime_dataframe = data.frame(nback_level_correct, subject_response_onset_correct,interstimulus_interval_correct, subject_id)
-  false_fires_dataframe = data.frame(false_fires_index, false_fires_nback_level, subject_id)
+  false_fires_dataframe = data.frame(false_fires_index, false_fires_nback_level, false_fires_isi, subject_id)
 
   # redo subject accuracy after removing the outliers
   subject_accuracy_r_logical = subject_response_padded == expected_correct_response_padded
@@ -295,7 +314,6 @@ analyze_nback_subject <- function(subject_path)
   # create all_response indices to remove conditions where subject did not respond at all
   all_response_indices = subject_response_padded
   all_response_indices[false_fires_index] = 1
-
 
   #  -----------------------------------------------------------------------------------------------------------------------
   # remove indices of condition where subject forgot which nback they were performing
@@ -396,10 +414,8 @@ analyze_nback_subject <- function(subject_path)
   #  -----------------------------------------------------------------------------------------------
 
   # # PLOT # #
-  # TO DO: what to do when only one response time (not engough to create violin plot)?
-
-  #accuracy_file_name_pdf = paste0("Accuracy_",toString(subject_id),".pdf")
-  #file = file.path(subject_path,"Figures",accuracy_file_name_pdf)
+  accuracy_file_name_tiff = paste0("Accuracy_",toString(subject_id),".tiff")
+  file = file.path(subject_path,"Figures",accuracy_file_name_tiff)
   ggplot(data=accuracy_dataframe_complete, aes(fill = ISI, x = nback, y=subject_accuracy)) + geom_bar(position = "dodge", stat = "identity") +
   scale_y_continuous(name = "Accuracy (%)",
                      breaks = seq(0, 100, 10),
@@ -413,16 +429,16 @@ analyze_nback_subject <- function(subject_path)
         legend.position = "bottom") +
     scale_fill_manual(values=c("orange","blue")) +
     labs(fill = "ISI")
-  #ggsave(file)
+  ggsave(file)
 
-  accuracy_file_name_jpeg = paste0("Accuracy_",toString(subject_id),".jpeg")
-  file = file.path(subject_path,"Figures",accuracy_file_name_jpeg)
-  ggplot(data=accuracy_dataframe_complete, aes(fill = ISI, x = nback, y=subject_accuracy)) + geom_bar(position = "dodge", stat = "identity") +
-  scale_y_continuous(name = "Accuracy (%)",
-                     breaks = seq(0, 100, 10),
-                     limits=c(0, 100)) +
+  responsetime_file_name_tiff = paste0("ResponseTime_",toString(subject_id),".tiff")
+  file = file.path(subject_path,"Figures",responsetime_file_name_tiff)
+  ggplot(responsetime_dataframe, aes(fill = interstimulus_interval_correct, x = factor(nback_level_correct), y = subject_response_onset_correct)) + geom_boxplot(alpha=0.7) + scale_x_discrete(name = "nback_level_correct") +
+    scale_y_continuous(name = "Reaction Time (ms)",
+                       breaks = seq(0, 1000, 50),
+                       limits=c(0, 1000)) +
     scale_x_discrete(name = "Nback Level") +
-    ggtitle("Subject Accuracy") +
+    ggtitle("Subject Reaction Time") +
     theme(plot.title = element_text(hjust = 0.5, size = 14, family = "Tahoma", face = "bold"),
           text = element_text(size = 12, family = "Tahoma"),
           axis.title = element_text(face="bold"),
@@ -432,38 +448,15 @@ analyze_nback_subject <- function(subject_path)
     labs(fill = "ISI")
   ggsave(file)
 
-  # responsetime_file_name_pdf = paste0("ResponseTime_",toString(subject_id),".pdf")
-  # file = file.path(subject_path,"Figures",responsetime_file_name_pdf)
-  ggplot(responsetime_dataframe, aes(fill = interstimulus_interval_correct, x = factor(nback_level_correct), y = subject_response_onset_correct)) + geom_boxplot(alpha=0.7) + scale_x_discrete(name = "nback_level_correct") +
-    scale_y_continuous(name = "Reaction Time (ms)",
-                       breaks = seq(0, 1000, 50),
-                       limits=c(0, 1000)) +
-    scale_x_discrete(name = "Nback Level") +
-    ggtitle("Subject Reaction Time") +
+  falsefire_file_name_tiff = paste0("FalseFires",toString(subject_id),".tiff")
+  file = file.path(subject_path,"Figures",falsefire_file_name_tiff)
+  ggplot(false_fires_dataframe, aes(x = false_fires_nback_level)) + stat_count(width = 0.5, fill="blue") + #geom_bar(position = "dodge", stat="bin") +
+    ggtitle("False Fire Rate") +
     theme(plot.title = element_text(hjust = 0.5, size = 14, family = "Tahoma", face = "bold"),
           text = element_text(size = 12, family = "Tahoma"),
           axis.title = element_text(face="bold"),
           axis.text.x=element_text(size = 11),
-          legend.position = "bottom") +
-    scale_fill_manual(values=c("orange","blue")) +
-    labs(fill = "ISI")
-  #ggsave(file)
-
-  responsetime_file_name_jpeg = paste0("ResponseTime_",toString(subject_id),".jpeg")
-  file = file.path(subject_path,"Figures",responsetime_file_name_jpeg)
-  ggplot(responsetime_dataframe, aes(fill = interstimulus_interval_correct, x = factor(nback_level_correct), y = subject_response_onset_correct)) + geom_boxplot(alpha=0.7) + scale_x_discrete(name = "nback_level_correct") +
-    scale_y_continuous(name = "Reaction Time (ms)",
-                       breaks = seq(0, 1000, 50),
-                       limits=c(0, 1000)) +
-    scale_x_discrete(name = "Nback Level") +
-    ggtitle("Subject Reaction Time") +
-    theme(plot.title = element_text(hjust = 0.5, size = 14, family = "Tahoma", face = "bold"),
-          text = element_text(size = 12, family = "Tahoma"),
-          axis.title = element_text(face="bold"),
-          axis.text.x=element_text(size = 11),
-          legend.position = "bottom") +
-    scale_fill_manual(values=c("orange","blue")) +
-    labs(fill = "ISI")
+          legend.position = "bottom")
   ggsave(file)
 }
 
