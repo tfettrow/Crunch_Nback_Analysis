@@ -18,10 +18,16 @@ analyze_nback_stats <- function(group_paths)
     # Goes into Subject directory to load file
     setwd(this_group_path)
 
-    this_variable = paste0(toString(this_group_id),"accuracy_data")
-    this_variable = read.csv(file.path("Group_Results/Nback_files/", paste0(toString(this_group_id), "_accuracy", ".csv")))
+    #this_variable = paste0(toString(this_group_id),"_accuracy")
+   # (paste0("Processed/Nback_files/accuracy_"), toString(this_subject_id))
 
-    paste0(toString(this_group_id),"responseTime_data") = read.csv(file.path("Group_Results/Nback_files/", paste0(toString(this_group_id), "_responseTime", ".csv")))
+
+    this_group_accuracy_data = read.csv(file.path("Group_Results/Nback_files", paste0(toString(this_group_id), "_accuracy.csv")))
+    this_group_response_data = read.csv(file.path("Group_Results/Nback_files/", paste0(toString(this_group_id), "_responseTime.csv")))
+
+
+
+
     #all_responseTime_data = rbind(all_responseTime_data, responseTime_data)  This data is already fed in as averaged
 
     # This goes back to Study folder to confirm proper current directory for saving into Group_Results folder
@@ -33,5 +39,14 @@ analyze_nback_stats <- function(group_paths)
 
 }
 
-fit <- lmer(Subjective_Valence ~ Emotion_Condition + (1|Participant_ID), data=df)
+#TF GUESS
+TF_GUESS_MODEL <- lmer(subject_response_onset_correct ~ nback_level_correct + (1|subject_id), data=this_group_response_data)  ##obviously not emotion condition
+summary(TF_GUESS_MODEL)
+anova(TF_GUESS_MODEL)
+
+
+
+fit <- lmer(group_accracy_data ~ Emotion_Condition + (1|group_id), data=df)  ##obviously not emotion condition
 anova(fit)
+
+#comparisons between eachi individual groups?
