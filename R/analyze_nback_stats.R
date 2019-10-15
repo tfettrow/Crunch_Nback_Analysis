@@ -6,6 +6,7 @@ analyze_nback_stats <- function(group_paths)
   library(lattice)
   library(ggplot2)
   library(rprime)
+  library(lmerTest)
 
 
   ## Difference between conditions, ISI, accuracy, RT
@@ -31,3 +32,6 @@ analyze_nback_stats <- function(group_paths)
   #group_accuracy_data_averaged <- aggregate(accuracy_data["subject_accuracy"], by=list(accuracy_data$ISI, accuracy_data$nback),FUN=mean)
 
 }
+
+fit <- lmer(Subjective_Valence ~ Emotion_Condition + (1|Participant_ID), data=df)
+anova(fit)
