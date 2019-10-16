@@ -8,7 +8,8 @@ analyze_nback_subject <- function(subject_path)
   library(dplyr)
 
   # TO DO
-  # confirm the file we are reading has the same subject code as specified in argument
+  # 1) confirm the file we are reading has the same subject code as specified in argument
+  # 2) make real whiskers
 
   subject_path_string_split = strsplit(subject_path,"/")[1][1]
   subject_id = vapply(subject_path_string_split, tail, "", 1)
@@ -25,7 +26,8 @@ analyze_nback_subject <- function(subject_path)
   study_path_split = strsplit(current_path,"/")[1][1]
   study_folder = vapply(study_path_split, tail, "", 1)
 
-  if ((subject_id == "1012" & subject_id == "1004") | study_folder == "MiM_Data")
+
+  if ((subject_id == "1012" || subject_id == "1004") && study_folder == "MiM_Data")
     {
       nback_data1 = read_excel(file.path(subject_path,"Raw/Nback_files/nback_results_Trial1.xlsx"), cell_rows(2:450), sheet = 1, col_types = "text")
       if (subject_id == "1004")
