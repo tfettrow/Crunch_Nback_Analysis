@@ -47,10 +47,24 @@ anova(TF_GUESS_MODEL)
 Accuracy_guess_model<- lmer(subject_accuracy ~ ISI + (1|subject_id), data=this_group_accuracy_data)  ##obviously not emotion condition
 summary(Accuracy_guess_model)
 anova(Accuracy_guess_model)
+
+library(multcompView)
+library(emmeans)
+
 ##could it be predicting accuracy by nback level?
-Accuracy_guess_model2<- lmer(subject_accuracy ~ nback + (1|subject_id), data=this_group_accuracy_data)  ##obviously not emotion condition
+
+
+Accuracy_guess_model2<- lmer(subject_accuracy ~ as.character(nback) + (1|subject_id), data=this_group_accuracy_data)  ##obviously not emotion condition
 summary(Accuracy_guess_model2)
 anova(Accuracy_guess_model2)
+rg_Accuracy_guess_model2 <- ref_grid(Accuracy_guess_model2)
+results <- emmeans(rg_Accuracy_guess_model2, "nback")
+
+
+
+NonRM_Acc_model2 <- aov(subject_accuracy ~ as.character(nback) + (1|subject_id), data=this_group_accuracy_data)
+summary(NonRM_Acc_model2)
+TukeyHSD(NonRM_Acc_model2, "nback")
 
 
 
@@ -64,8 +78,7 @@ anova(Accuracy_guess_model2)
 #             method="REML")
 
 
-library(multcompView)
-library(emmeans)
+
 
 #This is supposed to be an attempt at some post-hoc, additional comments are provided from the stats class, as was the code
 #
