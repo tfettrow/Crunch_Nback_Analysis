@@ -6,10 +6,13 @@ analyze_nback_subject <- function(subject_path)
   library(ggplot2)
   library(rprime)
   library(dplyr)
+  library(psycho)
+  library(readr)
 
   # TO DO
-  # 1) confirm the file we are reading has the same subject code as specified in argument
-  # 2) make real whiskers
+  # 1) add deprime variable and plot/save something
+  # 2) convert outlier removal to 2std away from median
+
 
   subject_path_string_split = strsplit(subject_path,"/")[1][1]
   subject_id = vapply(subject_path_string_split, tail, "", 1)
@@ -99,6 +102,11 @@ analyze_nback_subject <- function(subject_path)
     }else{
       nback_data = read_excel(file.path(subject_path,"Raw/Nback_files/nback_results.xlsx"), cell_rows(2:450), sheet = 1, col_types = "text")
 
+      if (!(nback_data$Subject[1] == subject_id))
+      {
+        warning('This results file does not match the subject folder')
+      }
+
       nback_block_labels = nback_data$`Running[SubTrial]`
 
       subject_accuracy_eprime = nback_data$Stimulus.ACC
@@ -150,7 +158,6 @@ analyze_nback_subject <- function(subject_path)
     subject_response_LMask2 = nback_data$LMask2.RESP
     subject_response_onset_LMask2 = nback_data$LMask2.RT
 
-
     indices_to_extract_from_SMask1 = which(subject_response_onset_SMask1 != "NA")
     indices_to_extract_from_LMask1 = which(subject_response_onset_LMask1 != "NA")
     indices_to_extract_from_LMask2 = which(subject_response_onset_LMask2 != "NA")
@@ -165,7 +172,6 @@ analyze_nback_subject <- function(subject_path)
     subject_response_onset_suspected_late[indices_to_extract_from_LMask2] = subject_response_onset_LMask2[indices_to_extract_from_LMask2]
 
   }
-
 
   #  -----------------------------------------------------------------------------------------------------------------------
   # Fixing some FNIRS eprime bugs
@@ -262,11 +268,15 @@ analyze_nback_subject <- function(subject_path)
 
   subject_response[indices_actual_late] = "1"
 
-  subject_response_onset[indices_actual_late] = subject_response_onset_suspected_late[indices_actual_late]
+  subject_response_onset[indices_actual_late] = as.numeric(subject_response_onset_suspected_late[indices_actual_late]) + 500 # TO DO: make sure this adds 500!!
 
   expected_correct_response_padded = expected_correct_response
-  na_indices= which(is.na(expected_correct_response_padded))
-  expected_correct_response_padded[na_indices] = 0
+  expected_rejected_indices = which(is.na(expected_correct_response_padded))
+  expected_correct_response_padded[expected_rejected_indices] = 0
+
+  expected_rejected = array(data=NA,length(expected_correct_response))
+  expected_rejected[expected_rejected_indices] = 1
+  expected_rejected[-expected_rejected_indices] = 0
 
   subject_response_padded = subject_response
   na_indices= which(is.na(subject_response_padded))
@@ -274,31 +284,44 @@ analyze_nback_subject <- function(subject_path)
 
   # determine the accurate responses
   subject_accuracy_r_logical = subject_response_padded == expected_correct_response_padded
-  subject_accuracy_r = subject_accuracy_r_logical * 1
+  total_subject_accuracy_r = subject_accuracy_r_logical * 1
 
-  # # find indices that are expected and accurate # #
-  subject_accuracy_r_numeric = as.numeric(subject_accuracy_r)
   expected_correct_response_padded_numeric = as.numeric(expected_correct_response_padded)
-  subject_accurate_and_expected = as.numeric(subject_accuracy_r_numeric == expected_correct_response_padded_numeric)
-  response_correct_indices = which(subject_accurate_and_expected == 1)
+
+  subject_response_and_expected = array(data=0,length(expected_correct_response))
+  subject_rejected_and_expected = array(data=0,length(expected_correct_response))
+  for (this_index in 1:length(total_subject_accuracy_r))
+  {
+    if (total_subject_accuracy_r[this_index] == 1 & expected_correct_response_padded_numeric[this_index] == 1)
+    {
+      subject_response_and_expected[this_index] = 1
+    }
+    if (total_subject_accuracy_r[this_index] == 1 & expected_rejected[this_index] == 1)
+    {
+      subject_rejected_and_expected[this_index] = 1
+    }
+  }
+
+  # determine which indices are expected (this seems redundant)
+  indices_response = which(subject_response_padded == "1")
+  indices_expected = which(expected_correct_response_padded == "1")
+
+
+  # 1) create a total accuracry matrix (currently subject_accuracy_r) this tells us if they responded when expected and not when not expected
+  # 2) next we need a matrix that tells us the indices where responded when expected (for response time)
+  # 3) also need a matrix that tells us whether rejected when expected (dprime)
+
+
+  response_correct_indices = which(subject_response_and_expected == 1)
+
+
 
   # # create array of onset times
   subject_response_onset_correct = as.numeric(subject_response_onset[response_correct_indices])
 
-  # # find indices that exceed thresholds
-  response_onset_outliers = which(subject_response_onset_correct > 1000 | subject_response_onset_correct < 70)
-  indices_to_remove_from_correct_responses = response_correct_indices[response_onset_outliers]
 
-  # # variables with new
-  response_correct_indices = setdiff(response_correct_indices, indices_to_remove_from_correct_responses)
 
-  subject_response_onset_correct = as.numeric(subject_response_onset[response_correct_indices])
 
-  subject_response_padded[indices_to_remove_from_correct_responses] = 0
-
-  # determine which indices are expecte (this seems redundant)
-  indices_response = which(subject_response_padded == "1")
-  indices_expected = which(expected_correct_response_padded == "1")
 
   false_fires_index <- unique(sort(append(false_fires_index, setdiff(indices_response,indices_expected))))
   false_fires_nback_level <- as.character(nback_level[false_fires_index])
@@ -310,15 +333,49 @@ analyze_nback_subject <- function(subject_path)
 
   # create data frames
   responsetime_dataframe = data.frame(nback_level_correct, subject_response_onset_correct,interstimulus_interval_correct, subject_id)
-  false_fires_dataframe = data.frame(false_fires_index, false_fires_nback_level, false_fires_isi, subject_id)
+  median_responsetime_dataframe <- aggregate(responsetime_dataframe$subject_response_onset_correct,
+                             by = list(nback_level = responsetime_dataframe$nback_level_correct, ISI = responsetime_dataframe$interstimulus_interval_correct, subject_id = responsetime_dataframe$subject_id),
+                             FUN=median)
+  colnames(median_responsetime_dataframe) <- c("nback_level", "ISI", "subject_id", "median_response_time")
+  median_responsetime_dataframe <- median_responsetime_dataframe[,c(1,2,4,3)]
+  median_responsetime_dataframe <- median_responsetime_dataframe[order(-as.numeric(median_responsetime_dataframe$ISI)),]
+
+  false_fires_array = array(data=0,length(expected_correct_response))
+  false_fires_array[false_fires_index] = 1
+
+  false_fires_dataframe = data.frame(false_fires_array, nback_level, interstimulus_interval, subject_id)
+  total_false_fires_dataframe <- aggregate(false_fires_dataframe$false_fires_array,
+                                           by = list(false_fires_dataframe$nback_level, false_fires_dataframe$interstimulus_interval,
+                                                     false_fires_dataframe$subject_id), FUN=sum)
+  colnames(total_false_fires_dataframe) <- c("nback_level", "ISI", "subject_id", "number_of_false_fires")
+  total_false_fires_dataframe <- total_false_fires_dataframe[,c(1,2,4,3)]
+
+
+  ############# remove outliers... this was originally placed a few lines up ########################################
+  # # find indices that exceed thresholds
+  #response_onset_outliers = which(subject_response_onset_correct > 1000 | subject_response_onset_correct < 70)
+  #indices_to_remove_from_correct_responses = response_correct_indices[response_onset_outliers]
+
+  # # variables with new
+  #response_correct_indices = setdiff(response_correct_indices, indices_to_remove_from_correct_responses)
+
+  #subject_response_onset_correct = as.numeric(subject_response_onset[response_correct_indices])
+
+  #subject_response_padded[indices_to_remove_from_correct_responses] = 0
+
+  ######################################################################################
+
 
   # redo subject accuracy after removing the outliers
-  subject_accuracy_r_logical = subject_response_padded == expected_correct_response_padded
-  subject_accuracy_r = subject_accuracy_r_logical * 1
+  #subject_accuracy_r_logical = subject_response_padded == expected_correct_response_padded
+  #subject_accuracy_r = subject_accuracy_r_logical * 1
 
   # create all_response indices to remove conditions where subject did not respond at all
   all_response_indices = subject_response_padded
   all_response_indices[false_fires_index] = 1
+
+
+
 
   #  -----------------------------------------------------------------------------------------------------------------------
   # remove indices of condition where subject forgot which nback they were performing
@@ -332,77 +389,191 @@ analyze_nback_subject <- function(subject_path)
         noresponse_condition_indices <- append(noresponse_condition_indices, this_condition_stim_indices)
       }
   }
+
+
   #  -----------------------------------------------------------------------------------------------------------------------
 
   # convert accuracy into percent ... find a simpler method!
-  if (any(noresponse_condition_indices)){
-    accuracy_dataframe = data.frame(nback_level[-noresponse_condition_indices], subject_accuracy_r[-noresponse_condition_indices], interstimulus_interval[-noresponse_condition_indices])
-  } else{
-    accuracy_dataframe = data.frame(nback_level, subject_accuracy_r, interstimulus_interval)
-  }
+  # if (any(noresponse_condition_indices)){
+  #   accuracy_dataframe = data.frame(nback_level[-noresponse_condition_indices], subject_accuracy_r[-noresponse_condition_indices], interstimulus_interval[-noresponse_condition_indices])
+  # } else{
+  #   accuracy_dataframe = data.frame(nback_level, total_subject_accuracy_r, interstimulus_interval)
+  # }
 
   #  -----------------------------------------------------------------------------------------------------------------------
 
-  zero_back_short_indices = which(accuracy_dataframe$interstimulus_interval == 500 & accuracy_dataframe$nback_level == 0 & as.numeric(expected_correct_response_padded) == 1)
-  one_back_short_indices = which(accuracy_dataframe$interstimulus_interval == 500 & accuracy_dataframe$nback_level == 1 & as.numeric(expected_correct_response_padded) == 1)
-  two_back_short_indices = which(accuracy_dataframe$interstimulus_interval == 500 & accuracy_dataframe$nback_level == 2 & as.numeric(expected_correct_response_padded) == 1)
-  three_back_short_indices = which(accuracy_dataframe$interstimulus_interval == 500 & accuracy_dataframe$nback_level == 3 & as.numeric(expected_correct_response_padded) == 1)
+  #zero_back_short_indices = which(accuracy_dataframe$interstimulus_interval == 500 & accuracy_dataframe$nback_level == 0 & as.numeric(expected_correct_response_padded) == 1)
+  #one_back_short_indices = which(accuracy_dataframe$interstimulus_interval == 500 & accuracy_dataframe$nback_level == 1 & as.numeric(expected_correct_response_padded) == 1)
+  #two_back_short_indices = which(accuracy_dataframe$interstimulus_interval == 500 & accuracy_dataframe$nback_level == 2 & as.numeric(expected_correct_response_padded) == 1)
+  #three_back_short_indices = which(accuracy_dataframe$interstimulus_interval == 500 & accuracy_dataframe$nback_level == 3 & as.numeric(expected_correct_response_padded) == 1)
 
-  zero_back_long_indices = which(accuracy_dataframe$interstimulus_interval == 1500 & accuracy_dataframe$nback_level == 0 & as.numeric(expected_correct_response_padded) == 1)
-  one_back_long_indices = which(accuracy_dataframe$interstimulus_interval == 1500 & accuracy_dataframe$nback_level == 1 & as.numeric(expected_correct_response_padded) == 1)
-  two_back_long_indices = which(accuracy_dataframe$interstimulus_interval == 1500 & accuracy_dataframe$nback_level == 2 & as.numeric(expected_correct_response_padded) == 1)
-  three_back_long_indices = which(accuracy_dataframe$interstimulus_interval == 1500 & accuracy_dataframe$nback_level == 3 & as.numeric(expected_correct_response_padded) == 1)
+  #zero_back_long_indices = which(accuracy_dataframe$interstimulus_interval == 1500 & accuracy_dataframe$nback_level == 0 & as.numeric(expected_correct_response_padded) == 1)
+  #one_back_long_indices = which(accuracy_dataframe$interstimulus_interval == 1500 & accuracy_dataframe$nback_level == 1 & as.numeric(expected_correct_response_padded) == 1)
+  #two_back_long_indices = which(accuracy_dataframe$interstimulus_interval == 1500 & accuracy_dataframe$nback_level == 2 & as.numeric(expected_correct_response_padded) == 1)
+  #three_back_long_indices = which(accuracy_dataframe$interstimulus_interval == 1500 & accuracy_dataframe$nback_level == 3 & as.numeric(expected_correct_response_padded) == 1)
 
-  zero_back_short_accuracy = accuracy_dataframe$subject_accuracy_r[zero_back_short_indices]
-  one_back_short_accuracy = accuracy_dataframe$subject_accuracy_r[one_back_short_indices]
-  two_back_short_accuracy = accuracy_dataframe$subject_accuracy_r[two_back_short_indices]
-  three_back_short_accuracy = accuracy_dataframe$subject_accuracy_r[three_back_short_indices]
+  #zero_back_short_accuracy = accuracy_dataframe$subject_accuracy_r[zero_back_short_indices]
+  #one_back_short_accuracy = accuracy_dataframe$subject_accuracy_r[one_back_short_indices]
+  #two_back_short_accuracy = accuracy_dataframe$subject_accuracy_r[two_back_short_indices]
+  #three_back_short_accuracy = accuracy_dataframe$subject_accuracy_r[three_back_short_indices]
 
-  zero_back_long_accuracy = accuracy_dataframe$subject_accuracy_r[zero_back_long_indices]
-  one_back_long_accuracy = accuracy_dataframe$subject_accuracy_r[one_back_long_indices]
-  two_back_long_accuracy = accuracy_dataframe$subject_accuracy_r[two_back_long_indices]
-  three_back_long_accuracy = accuracy_dataframe$subject_accuracy_r[three_back_long_indices]
+  # zero_back_long_accuracy = accuracy_dataframe$subject_accuracy_r[zero_back_long_indices]
+  # one_back_long_accuracy = accuracy_dataframe$subject_accuracy_r[one_back_long_indices]
+  # two_back_long_accuracy = accuracy_dataframe$subject_accuracy_r[two_back_long_indices]
+  # three_back_long_accuracy = accuracy_dataframe$subject_accuracy_r[three_back_long_indices]
 
-  zero_back_short_accuracy_percent = sum(zero_back_short_accuracy) / length (zero_back_short_accuracy) * 100
-  one_back_short_accuracy_percent = sum(one_back_short_accuracy) / length (one_back_short_accuracy) * 100
-  two_back_short_accuracy_percent = sum(two_back_short_accuracy) / length (two_back_short_accuracy) * 100
-  three_back_short_accuracy_percent = sum(three_back_short_accuracy) / length (three_back_short_accuracy) * 100
+  # zero_back_short_accuracy_percent = sum(zero_back_short_accuracy) / length (zero_back_short_accuracy) * 100
+  # one_back_short_accuracy_percent = sum(one_back_short_accuracy) / length (one_back_short_accuracy) * 100
+  # two_back_short_accuracy_percent = sum(two_back_short_accuracy) / length (two_back_short_accuracy) * 100
+  # three_back_short_accuracy_percent = sum(three_back_short_accuracy) / length (three_back_short_accuracy) * 100
+  #
+  # zero_back_long_accuracy_percent = sum(zero_back_long_accuracy) / length (zero_back_long_accuracy) * 100
+  # one_back_long_accuracy_percent = sum(one_back_long_accuracy) / length (one_back_long_accuracy) * 100
+  # two_back_long_accuracy_percent = sum(two_back_long_accuracy) / length (two_back_long_accuracy) * 100
+  # three_back_long_accuracy_percent = sum(three_back_long_accuracy) / length (three_back_long_accuracy) * 100
+  #
+  # subject_long_percents = data.frame(nback = c(as.character(0:3)), subject_accuracy = c(as.numeric(zero_back_long_accuracy_percent), as.numeric(one_back_short_accuracy_percent), as.numeric(two_back_long_accuracy_percent), as.numeric(three_back_long_accuracy_percent)), ISI = c("long", "long", "long", "long"), subject_id)
+  #
+  # subject_short_percents = data.frame(nback = c(as.character(0:3)), subject_accuracy = c(as.numeric(zero_back_short_accuracy_percent), as.numeric(one_back_long_accuracy_percent), as.numeric(two_back_short_accuracy_percent), as.numeric(three_back_short_accuracy_percent)), ISI = c("short", "short", "short", "short"), subject_id)
+  #
+  # accuracy_dataframe_complete = rbind(subject_long_percents,subject_short_percents)
 
-  zero_back_long_accuracy_percent = sum(zero_back_long_accuracy) / length (zero_back_long_accuracy) * 100
-  one_back_long_accuracy_percent = sum(one_back_long_accuracy) / length (one_back_long_accuracy) * 100
-  two_back_long_accuracy_percent = sum(two_back_long_accuracy) / length (two_back_long_accuracy) * 100
-  three_back_long_accuracy_percent = sum(three_back_long_accuracy) / length (three_back_long_accuracy) * 100
 
-  subject_long_percents = data.frame(nback = c(as.character(0:3)), subject_accuracy = c(as.numeric(zero_back_long_accuracy_percent), as.numeric(one_back_short_accuracy_percent), as.numeric(two_back_long_accuracy_percent), as.numeric(three_back_long_accuracy_percent)), ISI = c("long", "long", "long", "long"), subject_id)
 
-  subject_short_percents = data.frame(nback = c(as.character(0:3)), subject_accuracy = c(as.numeric(zero_back_short_accuracy_percent), as.numeric(one_back_long_accuracy_percent), as.numeric(two_back_short_accuracy_percent), as.numeric(three_back_short_accuracy_percent)), ISI = c("short", "short", "short", "short"), subject_id)
+  #  -----------------------------------------------------------------------------------------------------------------------
 
-  accuracy_dataframe_complete = rbind(subject_long_percents,subject_short_percents)
+  # removing the indices where the subject did not respond at all
+  if (any(noresponse_condition_indices)){
+    nback_level_results = nback_level[-noresponse_condition_indices]
+    interstimulus_interval_results = interstimulus_interval[-noresponse_condition_indices]
+    expected_correct_response_padded_numeric_results = expected_correct_response_padded_numeric[-noresponse_condition_indices]
+    subject_response_and_expected_results = subject_response_and_expected[-noresponse_condition_indices]
+    expected_rejected_results = expected_rejected[-noresponse_condition_indices]
+  } else{
+    nback_level_results = nback_level
+    interstimulus_interval_results = interstimulus_interval
+    expected_correct_response_padded_numeric_results = expected_correct_response_padded_numeric
+    subject_response_and_expected_results = subject_response_and_expected
+    expected_rejected_results = expected_rejected
+  }
+
+  results_dataframe <- aggregate(expected_correct_response_padded_numeric_results, by = list(nback_level_results, interstimulus_interval_results), FUN = sum)
+  colnames(dprime_dataframe) <- c("nback_level", "ISI", "number_of_expected_responses")
+
+  correct_responses_dataframe <- aggregate(subject_response_and_expected_results, by = list(nback_level_results, interstimulus_interval_results), FUN = sum)
+  colnames(correct_responses_dataframe) <-  c("nback_level", "ISI", "number_of_correct_responses")
+  results_dataframe$number_of_correct_responses = correct_responses_dataframe$number_of_correct_responses
+
+  results_dataframe$percent_correct = results_dataframe$number_of_correct_responses/results_dataframe$number_of_expected_responses * 100
+  results_dataframe$median_response_time = median_responsetime_dataframe$median_response_time
+
+  expected_rejected_dataframe <- aggregate(expected_rejected_results, by = list(nback_level_results, interstimulus_interval_results), FUN = sum)
+  colnames(expected_rejected_dataframe) <-  c("nback_level", "ISI", "number_of_expected_rejected")
+  results_dataframe$number_of_expected_rejected = expected_rejected_dataframe$number_of_expected_rejected
+
+  results_dataframe$number_of_false_fires = total_false_fires_dataframe$number_of_false_fires
+
+  # d'prime calculation
+
+  #Arguments
+  #n_hit: Number of hits.   (number_of_correct_responses)
+  #n_fa: Number of false alarms.  (number_of_false_alarms)
+  #n_miss: Number of misses.
+  #n_cr: Number of correct rejections.
+  #n_targets: Number of targets (n_hit + n_miss).
+  #n_distractors: Number of distractors (n_fa + n_cr).
+  #adjusted: Should it use the Hautus (1995) adjustments for extreme values.
+
+  sensitivity_dataframe <- psycho::dprime(
+    n_hit = results_dataframe$number_of_correct_responses,
+    n_fa = results_dataframe$number_of_false_fires,
+    n_targets = results_dataframe$number_of_expected_responses,
+    n_distractors = results_dataframe$number_of_expected_rejected,
+    adjusted = FALSE
+    )
+
+  results_dataframe$dprime <- sensitivity_dataframe$dprime
+  results_dataframe$beta <- sensitivity_dataframe$beta
+  results_dataframe$aprime <- sensitivity_dataframe$aprime
+  results_dataframe$bppd <- sensitivity_dataframe$bppd
+  results_dataframe$c <- sensitivity_dataframe$c
+
+
 
   #  -----------------------------------------------------------------------------------------------------------------------
   # # create condition onset arrays # #
 
   # determine the onset time of each condition
-  condition_onset_times_corrected <- vector()
+
   first_condition_onset_time_eprime <- vector()
-  for (this_condition in unique_subtrials){
-    this_condition_first_stim_index = min(which(nback_block_labels == this_condition))
-    this_condition_onset_time_eprime = stimulus_onset_times[this_condition_first_stim_index]
+  run_numbers = unique(stri_sub(unique_subtrials, 2,2))
 
-    # reset the time correction every 8 conditions (this makes up a run (for fMRI))
-    if (length(condition_onset_times_corrected)%%8 == 0 & length(condition_onset_times_corrected) >= 8){
-      first_condition_onset_time_eprime <- vector()
-    }
+  for (this_run in run_numbers){
+    this_condition_onset_time_corrected <- vector()
+    this_condition_rest_time_corrected <- vector()
+    condition_onset <- vector()
+    rest_onset <- vector()
+    condition_names <- vector()
 
-    if (length(first_condition_onset_time_eprime) == 0){
-      first_condition_onset_time_eprime = this_condition_onset_time_eprime
-      this_condition_onset_time_corrected = 4500
-    } else {
-      this_condition_onset_time_corrected = ((as.numeric(this_condition_onset_time_eprime) - as.numeric(first_condition_onset_time_eprime))) + 4500
+    this_run_indices = which(stri_sub(unique_subtrials, 2,2) == this_run)
+
+    for (this_condition in unique_subtrials[this_run_indices]){
+
+      this_nback_level = stri_sub(this_condition, 3,3)
+      this_nback_interval = stri_sub(this_condition, 1, 1)
+
+      this_condition_first_stim_index = min(which(nback_block_labels == this_condition))
+      this_condition_last_stim_index = max(which(nback_block_labels == this_condition))
+      this_condition_onset_time_eprime = stimulus_onset_times[this_condition_first_stim_index]
+
+      if (this_nback_interval == "L")
+      {
+        this_condition_rest_time_eprime = as.numeric(stimulus_onset_times[this_condition_last_stim_index]) + 2000
+      } else if (this_nback_interval == "S")
+      {
+        this_condition_rest_time_eprime = as.numeric(stimulus_onset_times[this_condition_last_stim_index]) + 1000
+      }
+
+      # reset the time correction every 8 conditions (this makes up a run)
+      if (length(condition_onset_times_corrected)%%8 == 0 & length(condition_onset_times_corrected) >= 8){
+        first_condition_onset_time_eprime <- vector()
+      }
+
+      if (length(first_condition_onset_time_eprime) == 0){
+        first_condition_onset_time_eprime = this_condition_onset_time_eprime
+        this_condition_onset_time_corrected = 4500
+      } else {
+        this_condition_onset_time_corrected = ((as.numeric(this_condition_onset_time_eprime) - as.numeric(first_condition_onset_time_eprime))) + 4500
+        this_condition_rest_time_corrected = ((as.numeric(this_condition_rest_time_eprime) - as.numeric(first_condition_onset_time_eprime))) + 4500
+      }
+      condition_onset = append(condition_onset, this_condition_onset_time_corrected)
+      rest_onset = append(rest_onset, this_condition_rest_time_corrected)
+
+      if (this_nback_level == "0" & this_nback_interval == "L") {
+        this_condition_name = "long_zero"
+      } else if (this_nback_level == "1" & this_nback_interval == "L") {
+        this_condition_name = "long_one"
+      } else if (this_nback_level == "2" & this_nback_interval == "L"){
+        this_condition_name = "long_two"
+      } else if (this_nback_level == "3" & this_nback_interval == "L"){
+        this_condition_name = "long_three"
+      } else if (this_nback_level == "0" & this_nback_interval == "S"){
+        this_condition_name = "short_zero"
+      } else if (this_nback_level == "1" & this_nback_interval == "S"){
+        this_condition_name = "short_one"
+      } else if (this_nback_level == "2" & this_nback_interval == "S"){
+        this_condition_name = "short_two"
+      } else if (this_nback_level == "3" & this_nback_interval == "S"){
+        this_condition_name = "short_three"
+      }
+      condition_names = append(condition_names, this_condition_name)
     }
-    condition_onset_times_corrected = append(condition_onset_times_corrected, this_condition_onset_time_corrected)
+    condition_onset_info_dataframe = data.frame(condition_onset, rest_onset, condition_names)
+
+    #condition_onset_info_dataframe = data.frame(condition_onset_times_corrected, new_condition_names)
+
+    write_csv(condition_onset_info_dataframe, file.path(subject_path, paste0("Processed/Nback_files/Condition_Onsets_Run", toString(this_run),".csv")))
   }
-  condition_onset_info_dataframe = data.frame(condition_onset_times_corrected, unique_subtrials)
 
   stimulus_onset_times_continuous_corrected = as.numeric(stimulus_onset_times) - as.numeric(stimulus_onset_times[1]) + 4500
   stimulus_onset_info_dataframe = data.frame(stimulus_onset_times_continuous_corrected, nback_block_labels)
@@ -411,17 +582,20 @@ analyze_nback_subject <- function(subject_path)
   # # WRITE DATA OF INTEREST TO FILE # #
 
   # # Store Data in Processed folder # #
-  write.csv(responsetime_dataframe, file = file.path(subject_path, paste0("Processed/Nback_files/responseTime_", toString(subject_id),".csv")))
-  write.csv(accuracy_dataframe_complete, file = file.path(subject_path, paste0("Processed/Nback_files/accuracy_", toString(subject_id),".csv")))
-  write.csv(condition_onset_info_dataframe, file = file.path(subject_path, paste0("Processed/Nback_files/conditionOnset_", toString(subject_id),".csv")))
-  write.csv(stimulus_onset_info_dataframe, file = file.path(subject_path, paste0("Processed/Nback_files/stimulusnOnsetContinuous_", toString(subject_id),".csv")))
-  write.csv(false_fires_dataframe, file = file.path(subject_path, paste0("Processed/Nback_files/falsefires_", toString(subject_id),".csv")))
+  #write_csv(median_responsetime_dataframe, file.path(subject_path, paste0("Processed/Nback_files/median_responsetime_", toString(subject_id),".csv")))
+  #write.csv(median_responsetime_dataframe, file = file.path(subject_path, paste0("Processed/Nback_files/median_responsetime_", toString(subject_id),".csv")))
+  #write_csv(responsetime_dataframe, file.path(subject_path, paste0("Processed/Nback_files/all_responsetime_", toString(subject_id),".csv")))
+  #write_csv(accuracy_dataframe_complete, file.path(subject_path, paste0("Processed/Nback_files/accuracy_", toString(subject_id),".csv")))
+  write_csv(stimulus_onset_info_dataframe, file.path(subject_path, paste0("Processed/Nback_files/Stimulus_Onsets_", toString(subject_id),".csv")))
+  write_csv(results_dataframe, file.path(subject_path, paste0("Processed/Nback_files/results_", toString(subject_id),".csv")))
+
+  #write_csv(total_false_fires_dataframe, file.path(subject_path, paste0("Processed/Nback_files/falsefires_", toString(subject_id),".csv")))
   #  -----------------------------------------------------------------------------------------------
 
   # # PLOT # #
   accuracy_file_name_tiff = paste0("Accuracy_",toString(subject_id),".tiff")
   file = file.path(subject_path,"Figures",accuracy_file_name_tiff)
-  ggplot(data=accuracy_dataframe_complete, aes(fill = ISI, x = nback, y=subject_accuracy)) + geom_bar(position = "dodge", stat = "identity") +
+  ggplot(data=results_dataframe, aes(fill = factor(ISI), x = factor(nback_level), y=percent_correct)) + geom_bar(position = "dodge", stat = "identity") +
   scale_y_continuous(name = "Accuracy (%)",
                      breaks = seq(0, 100, 10),
                      limits=c(0, 100)) +
@@ -438,12 +612,25 @@ analyze_nback_subject <- function(subject_path)
 
   responsetime_file_name_tiff = paste0("ResponseTime_",toString(subject_id),".tiff")
   file = file.path(subject_path,"Figures",responsetime_file_name_tiff)
-  ggplot(responsetime_dataframe, aes(fill = interstimulus_interval_correct, x = factor(nback_level_correct), y = subject_response_onset_correct)) + geom_boxplot(alpha=0.7) + scale_x_discrete(name = "nback_level_correct") +
-    scale_y_continuous(name = "Reaction Time (ms)",
-                       breaks = seq(0, 1000, 50),
-                       limits=c(0, 1000)) +
+  ggplot(responsetime_dataframe, aes(fill = interstimulus_interval_correct, x = factor(nback_level_correct), y = subject_response_onset_correct)) + stat_boxplot(geom ='errorbar') + geom_boxplot(alpha=0.7) + scale_x_discrete(name = "nback_level_correct") +
+    geom_point(aes(fill = interstimulus_interval_correct), size = 3, shape = 21, position = position_jitterdodge()) +
     scale_x_discrete(name = "Nback Level") +
     ggtitle("Subject Reaction Time") +
+    theme(plot.title = element_text(hjust = 0.5, size = 14, family = "Tahoma", face = "bold"),
+          text = element_text(size = 12, family = "Tahoma"),
+          axis.title = element_text(face="bold"),
+          axis.text.x=element_text(size = 11),
+          legend.position = "bottom") +
+    scale_fill_manual(values=c("blue","orange")) +
+    labs(fill = "ISI")
+  ggsave(file)
+
+  falsefire_file_name_tiff = paste0("FalseFires",toString(subject_id),".tiff")
+  file = file.path(subject_path,"Figures",falsefire_file_name_tiff)
+  ggplot(results_dataframe, aes(fill = factor(ISI), x = factor(nback_level), y=number_of_false_fires)) + geom_bar(position = "dodge", stat = "identity") + # + stat_count(width = 0.5, fill="blue") + #geom_bar(position = "dodge", stat="bin") +
+    ggtitle("False Fire Rate") +
+    scale_y_continuous(name = "Number of False Fires") +
+    scale_x_discrete(name = "Nback Level") +
     theme(plot.title = element_text(hjust = 0.5, size = 14, family = "Tahoma", face = "bold"),
           text = element_text(size = 12, family = "Tahoma"),
           axis.title = element_text(face="bold"),
@@ -452,16 +639,4 @@ analyze_nback_subject <- function(subject_path)
     scale_fill_manual(values=c("orange","blue")) +
     labs(fill = "ISI")
   ggsave(file)
-
-  falsefire_file_name_tiff = paste0("FalseFires",toString(subject_id),".tiff")
-  file = file.path(subject_path,"Figures",falsefire_file_name_tiff)
-  ggplot(false_fires_dataframe, aes(x = false_fires_nback_level)) + stat_count(width = 0.5, fill="blue") + #geom_bar(position = "dodge", stat="bin") +
-    ggtitle("False Fire Rate") +
-    theme(plot.title = element_text(hjust = 0.5, size = 14, family = "Tahoma", face = "bold"),
-          text = element_text(size = 12, family = "Tahoma"),
-          axis.title = element_text(face="bold"),
-          axis.text.x=element_text(size = 11),
-          legend.position = "bottom")
-  ggsave(file)
 }
-
