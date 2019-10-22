@@ -321,12 +321,40 @@ analyze_nback_subject <- function(subject_path)
 
   # create data frames
   responsetime_dataframe = data.frame(nback_level_correct, subject_response_onset_correct,interstimulus_interval_correct, subject_id)
+
+  # mad_responsetime_dataframe <- aggregate(responsetime_dataframe$subject_response_onset_correct,
+  #                                         by = list(nback_level = responsetime_dataframe$nback_level_correct, ISI = responsetime_dataframe$interstimulus_interval_correct, subject_id = responsetime_dataframe$subject_id),
+  #                                         function(x) c(mad_value = 2.5 * median(abs(x - median(x)))))
+  # colnames(mad_responsetime_dataframe) <- c("nback_level", "ISI", "subject_id", "mad_value")
+  # mad_responsetime_dataframe <- mad_responsetime_dataframe[,c(1,2,4,3)]
+  # mad_responsetime_dataframe <- mad_responsetime_dataframe[order(-as.numeric(mad_responsetime_dataframe$ISI)),]
+  #
+  # median_responsetime_dataframe <- aggregate(responsetime_dataframe$subject_response_onset_correct,
+  #                                            by = list(nback_level = responsetime_dataframe$nback_level_correct, ISI = responsetime_dataframe$interstimulus_interval_correct, subject_id = responsetime_dataframe$subject_id),
+  #                                            FUN=median)
+  # colnames(median_responsetime_dataframe) <- c("nback_level", "ISI", "subject_id", "median_response_time")
+  # median_responsetime_dataframe <- median_responsetime_dataframe[,c(1,2,4,3)]
+  # median_responsetime_dataframe <- median_responsetime_dataframe[order(-as.numeric(median_responsetime_dataframe$ISI)),]
+  #
+
+  # then determine which indices of these correspond to values of response_correct_indices so we can remove the appropriate indices
+  # from nback_level, interstimulus interval, subject_response, subject_response_onset
+
+
+
+
+  # vv need to remove outliers before this step vv
+  # calculate median again
   median_responsetime_dataframe <- aggregate(responsetime_dataframe$subject_response_onset_correct,
-                             by = list(nback_level = responsetime_dataframe$nback_level_correct, ISI = responsetime_dataframe$interstimulus_interval_correct, subject_id = responsetime_dataframe$subject_id),
-                             FUN=median)
+                                             by = list(nback_level = responsetime_dataframe$nback_level_correct, ISI = responsetime_dataframe$interstimulus_interval_correct, subject_id = responsetime_dataframe$subject_id),
+                                             FUN=median)
   colnames(median_responsetime_dataframe) <- c("nback_level", "ISI", "subject_id", "median_response_time")
   median_responsetime_dataframe <- median_responsetime_dataframe[,c(1,2,4,3)]
   median_responsetime_dataframe <- median_responsetime_dataframe[order(-as.numeric(median_responsetime_dataframe$ISI)),]
+
+  std_responsetime_dataframe <- aggregate(responsetime_dataframe$subject_response_onset_correct,
+                                          by = list(nback_level = responsetime_dataframe$nback_level_correct, ISI = responsetime_dataframe$interstimulus_interval_correct, subject_id = responsetime_dataframe$subject_id),
+                                          FUN=sd)
 
   false_fires_array = array(data=0,length(expected_correct_response))
   false_fires_array[false_fires_index] = 1
@@ -355,7 +383,6 @@ analyze_nback_subject <- function(subject_path)
       }
   }
 
-
   #  -----------------------------------------------------------------------------------------------------------------------
 
   # removing the indices where the subject did not respond at all
@@ -374,7 +401,7 @@ analyze_nback_subject <- function(subject_path)
   }
 
   results_dataframe <- aggregate(expected_correct_response_padded_numeric_results, by = list(nback_level_results, interstimulus_interval_results), FUN = sum)
-  colnames(dprime_dataframe) <- c("nback_level", "ISI", "number_of_expected_responses")
+  colnames(results_dataframe) <- c("nback_level", "ISI", "number_of_expected_responses")
 
   correct_responses_dataframe <- aggregate(subject_response_and_expected_results, by = list(nback_level_results, interstimulus_interval_results), FUN = sum)
   colnames(correct_responses_dataframe) <-  c("nback_level", "ISI", "number_of_correct_responses")
@@ -408,19 +435,17 @@ analyze_nback_subject <- function(subject_path)
     adjusted = FALSE
     )
 
-  results_dataframe$dprime <- sensitivity_dataframe$dprime
-  results_dataframe$beta <- sensitivity_dataframe$beta
-  results_dataframe$aprime <- sensitivity_dataframe$aprime
-  results_dataframe$bppd <- sensitivity_dataframe$bppd
-  results_dataframe$c <- sensitivity_dataframe$c
-
-
+  results_dataframe$dprime <- round(sensitivity_dataframe$dprime, digits = 2)
+  results_dataframe$beta <- round(sensitivity_dataframe$beta, digits = 2)
+  results_dataframe$aprime <- round(sensitivity_dataframe$aprime, digits = 2)
+  results_dataframe$bppd <- round(sensitivity_dataframe$bppd, digits = 2)
+  results_dataframe$c <- round(sensitivity_dataframe$c, digits = 2)
 
   #  -----------------------------------------------------------------------------------------------------------------------
   # # create condition onset arrays # #
 
   # determine the onset time of each condition
-
+  condition_onset_times_corrected <- vector()
   first_condition_onset_time_eprime <- vector()
   run_numbers = unique(stri_sub(unique_subtrials, 2,2))
 
@@ -458,6 +483,7 @@ analyze_nback_subject <- function(subject_path)
       if (length(first_condition_onset_time_eprime) == 0){
         first_condition_onset_time_eprime = this_condition_onset_time_eprime
         this_condition_onset_time_corrected = 4500
+        this_condition_rest_time_corrected = this_condition_rest_time_eprime
       } else {
         this_condition_onset_time_corrected = ((as.numeric(this_condition_onset_time_eprime) - as.numeric(first_condition_onset_time_eprime))) + 4500
         this_condition_rest_time_corrected = ((as.numeric(this_condition_rest_time_eprime) - as.numeric(first_condition_onset_time_eprime))) + 4500
