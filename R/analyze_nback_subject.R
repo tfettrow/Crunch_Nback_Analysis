@@ -306,22 +306,10 @@ analyze_nback_subject <- function(subject_path)
   indices_response = which(subject_response_padded == "1")
   indices_expected = which(expected_correct_response_padded == "1")
 
-
-  # 1) create a total accuracry matrix (currently subject_accuracy_r) this tells us if they responded when expected and not when not expected
-  # 2) next we need a matrix that tells us the indices where responded when expected (for response time)
-  # 3) also need a matrix that tells us whether rejected when expected (dprime)
-
-
   response_correct_indices = which(subject_response_and_expected == 1)
-
-
 
   # # create array of onset times
   subject_response_onset_correct = as.numeric(subject_response_onset[response_correct_indices])
-
-
-
-
 
   false_fires_index <- unique(sort(append(false_fires_index, setdiff(indices_response,indices_expected))))
   false_fires_nback_level <- as.character(nback_level[false_fires_index])
@@ -350,32 +338,9 @@ analyze_nback_subject <- function(subject_path)
   colnames(total_false_fires_dataframe) <- c("nback_level", "ISI", "subject_id", "number_of_false_fires")
   total_false_fires_dataframe <- total_false_fires_dataframe[,c(1,2,4,3)]
 
-
-  ############# remove outliers... this was originally placed a few lines up ########################################
-  # # find indices that exceed thresholds
-  #response_onset_outliers = which(subject_response_onset_correct > 1000 | subject_response_onset_correct < 70)
-  #indices_to_remove_from_correct_responses = response_correct_indices[response_onset_outliers]
-
-  # # variables with new
-  #response_correct_indices = setdiff(response_correct_indices, indices_to_remove_from_correct_responses)
-
-  #subject_response_onset_correct = as.numeric(subject_response_onset[response_correct_indices])
-
-  #subject_response_padded[indices_to_remove_from_correct_responses] = 0
-
-  ######################################################################################
-
-
-  # redo subject accuracy after removing the outliers
-  #subject_accuracy_r_logical = subject_response_padded == expected_correct_response_padded
-  #subject_accuracy_r = subject_accuracy_r_logical * 1
-
   # create all_response indices to remove conditions where subject did not respond at all
   all_response_indices = subject_response_padded
   all_response_indices[false_fires_index] = 1
-
-
-
 
   #  -----------------------------------------------------------------------------------------------------------------------
   # remove indices of condition where subject forgot which nback they were performing
@@ -389,55 +354,6 @@ analyze_nback_subject <- function(subject_path)
         noresponse_condition_indices <- append(noresponse_condition_indices, this_condition_stim_indices)
       }
   }
-
-
-  #  -----------------------------------------------------------------------------------------------------------------------
-
-  # convert accuracy into percent ... find a simpler method!
-  # if (any(noresponse_condition_indices)){
-  #   accuracy_dataframe = data.frame(nback_level[-noresponse_condition_indices], subject_accuracy_r[-noresponse_condition_indices], interstimulus_interval[-noresponse_condition_indices])
-  # } else{
-  #   accuracy_dataframe = data.frame(nback_level, total_subject_accuracy_r, interstimulus_interval)
-  # }
-
-  #  -----------------------------------------------------------------------------------------------------------------------
-
-  #zero_back_short_indices = which(accuracy_dataframe$interstimulus_interval == 500 & accuracy_dataframe$nback_level == 0 & as.numeric(expected_correct_response_padded) == 1)
-  #one_back_short_indices = which(accuracy_dataframe$interstimulus_interval == 500 & accuracy_dataframe$nback_level == 1 & as.numeric(expected_correct_response_padded) == 1)
-  #two_back_short_indices = which(accuracy_dataframe$interstimulus_interval == 500 & accuracy_dataframe$nback_level == 2 & as.numeric(expected_correct_response_padded) == 1)
-  #three_back_short_indices = which(accuracy_dataframe$interstimulus_interval == 500 & accuracy_dataframe$nback_level == 3 & as.numeric(expected_correct_response_padded) == 1)
-
-  #zero_back_long_indices = which(accuracy_dataframe$interstimulus_interval == 1500 & accuracy_dataframe$nback_level == 0 & as.numeric(expected_correct_response_padded) == 1)
-  #one_back_long_indices = which(accuracy_dataframe$interstimulus_interval == 1500 & accuracy_dataframe$nback_level == 1 & as.numeric(expected_correct_response_padded) == 1)
-  #two_back_long_indices = which(accuracy_dataframe$interstimulus_interval == 1500 & accuracy_dataframe$nback_level == 2 & as.numeric(expected_correct_response_padded) == 1)
-  #three_back_long_indices = which(accuracy_dataframe$interstimulus_interval == 1500 & accuracy_dataframe$nback_level == 3 & as.numeric(expected_correct_response_padded) == 1)
-
-  #zero_back_short_accuracy = accuracy_dataframe$subject_accuracy_r[zero_back_short_indices]
-  #one_back_short_accuracy = accuracy_dataframe$subject_accuracy_r[one_back_short_indices]
-  #two_back_short_accuracy = accuracy_dataframe$subject_accuracy_r[two_back_short_indices]
-  #three_back_short_accuracy = accuracy_dataframe$subject_accuracy_r[three_back_short_indices]
-
-  # zero_back_long_accuracy = accuracy_dataframe$subject_accuracy_r[zero_back_long_indices]
-  # one_back_long_accuracy = accuracy_dataframe$subject_accuracy_r[one_back_long_indices]
-  # two_back_long_accuracy = accuracy_dataframe$subject_accuracy_r[two_back_long_indices]
-  # three_back_long_accuracy = accuracy_dataframe$subject_accuracy_r[three_back_long_indices]
-
-  # zero_back_short_accuracy_percent = sum(zero_back_short_accuracy) / length (zero_back_short_accuracy) * 100
-  # one_back_short_accuracy_percent = sum(one_back_short_accuracy) / length (one_back_short_accuracy) * 100
-  # two_back_short_accuracy_percent = sum(two_back_short_accuracy) / length (two_back_short_accuracy) * 100
-  # three_back_short_accuracy_percent = sum(three_back_short_accuracy) / length (three_back_short_accuracy) * 100
-  #
-  # zero_back_long_accuracy_percent = sum(zero_back_long_accuracy) / length (zero_back_long_accuracy) * 100
-  # one_back_long_accuracy_percent = sum(one_back_long_accuracy) / length (one_back_long_accuracy) * 100
-  # two_back_long_accuracy_percent = sum(two_back_long_accuracy) / length (two_back_long_accuracy) * 100
-  # three_back_long_accuracy_percent = sum(three_back_long_accuracy) / length (three_back_long_accuracy) * 100
-  #
-  # subject_long_percents = data.frame(nback = c(as.character(0:3)), subject_accuracy = c(as.numeric(zero_back_long_accuracy_percent), as.numeric(one_back_short_accuracy_percent), as.numeric(two_back_long_accuracy_percent), as.numeric(three_back_long_accuracy_percent)), ISI = c("long", "long", "long", "long"), subject_id)
-  #
-  # subject_short_percents = data.frame(nback = c(as.character(0:3)), subject_accuracy = c(as.numeric(zero_back_short_accuracy_percent), as.numeric(one_back_long_accuracy_percent), as.numeric(two_back_short_accuracy_percent), as.numeric(three_back_short_accuracy_percent)), ISI = c("short", "short", "short", "short"), subject_id)
-  #
-  # accuracy_dataframe_complete = rbind(subject_long_percents,subject_short_percents)
-
 
 
   #  -----------------------------------------------------------------------------------------------------------------------
