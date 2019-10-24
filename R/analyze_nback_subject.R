@@ -347,14 +347,14 @@ analyze_nback_subject <- function(subject_path)
   # calculate median again
   median_responsetime_dataframe <- aggregate(responsetime_dataframe$subject_response_onset_correct,
                                              by = list(nback_level = responsetime_dataframe$nback_level_correct, ISI = responsetime_dataframe$interstimulus_interval_correct, subject_id = responsetime_dataframe$subject_id),
-                                             FUN=median)
+                                             FUN=median, drop=FALSE)
   colnames(median_responsetime_dataframe) <- c("nback_level", "ISI", "subject_id", "median_response_time")
   median_responsetime_dataframe <- median_responsetime_dataframe[,c(1,2,4,3)]
   median_responsetime_dataframe <- median_responsetime_dataframe[order(-as.numeric(median_responsetime_dataframe$ISI)),]
 
   std_responsetime_dataframe <- aggregate(responsetime_dataframe$subject_response_onset_correct,
                                           by = list(nback_level = responsetime_dataframe$nback_level_correct, ISI = responsetime_dataframe$interstimulus_interval_correct, subject_id = responsetime_dataframe$subject_id),
-                                          FUN=sd)
+                                          FUN=sd, drop=FALSE)
 
   false_fires_array = array(data=0,length(expected_correct_response))
   false_fires_array[false_fires_index] = 1
@@ -445,11 +445,9 @@ analyze_nback_subject <- function(subject_path)
   # # create condition onset arrays # #
 
   # determine the onset time of each condition
-  condition_onset_times_corrected <- vector()
-  first_condition_onset_time_eprime <- vector()
   run_numbers = unique(stri_sub(unique_subtrials, 2,2))
-
   for (this_run in run_numbers){
+    first_condition_onset_time_eprime <- vector()
     this_condition_onset_time_corrected <- vector()
     this_condition_rest_time_corrected <- vector()
     condition_onset <- vector()
@@ -476,14 +474,14 @@ analyze_nback_subject <- function(subject_path)
       }
 
       # reset the time correction every 8 conditions (this makes up a run)
-      if (length(condition_onset_times_corrected)%%8 == 0 & length(condition_onset_times_corrected) >= 8){
-        first_condition_onset_time_eprime <- vector()
-      }
+      # if (length(condition_onset)%%8 == 0 & length(condition_onset) >= 8){
+      #   first_condition_onset_time_eprime <- vector()
+      # }
 
       if (length(first_condition_onset_time_eprime) == 0){
         first_condition_onset_time_eprime = this_condition_onset_time_eprime
         this_condition_onset_time_corrected = 4500
-        this_condition_rest_time_corrected = this_condition_rest_time_eprime
+        this_condition_rest_time_corrected = ((as.numeric(this_condition_rest_time_eprime) - as.numeric(first_condition_onset_time_eprime))) + 4500
       } else {
         this_condition_onset_time_corrected = ((as.numeric(this_condition_onset_time_eprime) - as.numeric(first_condition_onset_time_eprime))) + 4500
         this_condition_rest_time_corrected = ((as.numeric(this_condition_rest_time_eprime) - as.numeric(first_condition_onset_time_eprime))) + 4500
@@ -524,14 +522,9 @@ analyze_nback_subject <- function(subject_path)
   # # WRITE DATA OF INTEREST TO FILE # #
 
   # # Store Data in Processed folder # #
-  #write_csv(median_responsetime_dataframe, file.path(subject_path, paste0("Processed/Nback_files/median_responsetime_", toString(subject_id),".csv")))
-  #write.csv(median_responsetime_dataframe, file = file.path(subject_path, paste0("Processed/Nback_files/median_responsetime_", toString(subject_id),".csv")))
-  #write_csv(responsetime_dataframe, file.path(subject_path, paste0("Processed/Nback_files/all_responsetime_", toString(subject_id),".csv")))
-  #write_csv(accuracy_dataframe_complete, file.path(subject_path, paste0("Processed/Nback_files/accuracy_", toString(subject_id),".csv")))
   write_csv(stimulus_onset_info_dataframe, file.path(subject_path, paste0("Processed/Nback_files/Stimulus_Onsets_", toString(subject_id),".csv")))
   write_csv(results_dataframe, file.path(subject_path, paste0("Processed/Nback_files/results_", toString(subject_id),".csv")))
 
-  #write_csv(total_false_fires_dataframe, file.path(subject_path, paste0("Processed/Nback_files/falsefires_", toString(subject_id),".csv")))
   #  -----------------------------------------------------------------------------------------------
 
   # # PLOT # #
