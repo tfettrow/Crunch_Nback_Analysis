@@ -207,7 +207,6 @@ analyze_nback_subject <- function(subject_path)
     subject_response[indices_to_replace2] = subject_response2[indices_to_replace2]
     subject_response_onset[indices_to_replace2] = subject_response_onset2[indices_to_replace2]
 
-
     subject_accuracy_eprime3 = nback_data$Stimulus3.ACC
     stimulus_onset_times3 = nback_data$Stimulus3.OnsetTime
     expected_correct_response3 = nback_data$Stimulus3.CRESP
@@ -324,7 +323,7 @@ analyze_nback_subject <- function(subject_path)
 
   # mad_responsetime_dataframe <- aggregate(responsetime_dataframe$subject_response_onset_correct,
   #                                         by = list(nback_level = responsetime_dataframe$nback_level_correct, ISI = responsetime_dataframe$interstimulus_interval_correct, subject_id = responsetime_dataframe$subject_id),
-  #                                         function(x) c(mad_value = 2.5 * median(abs(x - median(x)))))
+  #                                         function(x) c(mad_value = 3.5 * median(abs(x - median(x)))))
   # colnames(mad_responsetime_dataframe) <- c("nback_level", "ISI", "subject_id", "mad_value")
   # mad_responsetime_dataframe <- mad_responsetime_dataframe[,c(1,2,4,3)]
   # mad_responsetime_dataframe <- mad_responsetime_dataframe[order(-as.numeric(mad_responsetime_dataframe$ISI)),]
@@ -336,10 +335,41 @@ analyze_nback_subject <- function(subject_path)
   # median_responsetime_dataframe <- median_responsetime_dataframe[,c(1,2,4,3)]
   # median_responsetime_dataframe <- median_responsetime_dataframe[order(-as.numeric(median_responsetime_dataframe$ISI)),]
   #
+  # for (this_index in 1:nrow(mad_responsetime_dataframe))
+  # {
+  #   this_cond_mad_frame = mad_responsetime_dataframe[4,]
+  #   this_cond_median_frame = median_responsetime_dataframe[4,]
+  #   this_cond_responsetime_dataframe_indices = which(responsetime_dataframe$nback_level_correct == this_cond_mad_frame$nback_level & responsetime_dataframe$interstimulus_interval_correct == this_cond_mad_frame$ISI)
+  #
+  #   this_cond_outlier_indices = which((abs(responsetime_dataframe$subject_response_onset_correct[this_cond_responsetime_dataframe_indices]-this_cond_median_frame$median_response_time)) > this_cond_mad_frame$mad_value)
+  # }
 
-  # then determine which indices of these correspond to values of response_correct_indices so we can remove the appropriate indices
-  # from nback_level, interstimulus interval, subject_response, subject_response_onset
 
+
+
+#####################################################################################################
+  # mad_responsetime_dataframe <- aggregate(responsetime_dataframe$subject_response_onset_correct,
+  #                                         by = list(subject_id = responsetime_dataframe$subject_id),
+  #                                         function(x) c(mad_value = 8 * median(abs(x - median(x)))))
+  # colnames(mad_responsetime_dataframe) <- c("subject_id", "mad_value")
+  #
+  # outlier_correct_indices = which((abs(responsetime_dataframe$subject_response_onset_correct - median(responsetime_dataframe$subject_response_onset_correct)))  > mad_responsetime_dataframe$mad_value)
+
+  outlier_correct_indices = which(responsetime_dataframe$subject_response_onset_correct > 1000 | responsetime_dataframe$subject_response_onset_correct < 100)
+
+
+  responsetime_dataframe = responsetime_dataframe[-outlier_correct_indices,]
+
+  false_fires_index = append(false_fires_index,outlier_correct_indices)
+  false_fires_index = sort(false_fires_index)
+
+  results_indices = response_correct_indices[outlier_correct_indices]
+
+  subject_response_and_expected[results_indices] = 0
+
+
+
+  #####################################################################################################
 
 
 
@@ -352,9 +382,11 @@ analyze_nback_subject <- function(subject_path)
   median_responsetime_dataframe <- median_responsetime_dataframe[,c(1,2,4,3)]
   median_responsetime_dataframe <- median_responsetime_dataframe[order(-as.numeric(median_responsetime_dataframe$ISI)),]
 
-  std_responsetime_dataframe <- aggregate(responsetime_dataframe$subject_response_onset_correct,
-                                          by = list(nback_level = responsetime_dataframe$nback_level_correct, ISI = responsetime_dataframe$interstimulus_interval_correct, subject_id = responsetime_dataframe$subject_id),
-                                          FUN=sd, drop=FALSE)
+  # std_responsetime_dataframe <- aggregate(responsetime_dataframe$subject_response_onset_correct,
+  #                                         by = list(nback_level = responsetime_dataframe$nback_level_correct, ISI = responsetime_dataframe$interstimulus_interval_correct, subject_id = responsetime_dataframe$subject_id),
+  #                                         FUN=sd, drop=FALSE)
+
+
 
   false_fires_array = array(data=0,length(expected_correct_response))
   false_fires_array[false_fires_index] = 1
@@ -427,11 +459,29 @@ analyze_nback_subject <- function(subject_path)
   #n_distractors: Number of distractors (n_fa + n_cr).
   #adjusted: Should it use the Hautus (1995) adjustments for extreme values.
 
+  # Adjustment
+  # dprime inf: consider half hits if perfect
+  # ff NaN: half hits
+  # results_dataframe$number_of_correct_responses
+
+  # find the indices where there are perfect hits (16/16) and false fire are 0
+
+  n_hit = results_dataframe$number_of_correct_responses
+  n_fa = results_dataframe$number_of_false_fires
+  n_targets = results_dataframe$number_of_expected_responses
+  n_distractors = results_dataframe$number_of_expected_rejected
+
+  perfect_hit_indices = which(results_dataframe$number_of_correct_responses == 16)
+  perfect_falsefire_indices = which(results_dataframe$number_of_false_fires == 0)
+
+  n_hit[perfect_hit_indices] = 15.5
+  n_fa[perfect_falsefire_indices] = .05
+
   sensitivity_dataframe <- psycho::dprime(
-    n_hit = results_dataframe$number_of_correct_responses,
-    n_fa = results_dataframe$number_of_false_fires,
-    n_targets = results_dataframe$number_of_expected_responses,
-    n_distractors = results_dataframe$number_of_expected_rejected,
+    n_hit,
+    n_fa,
+    n_targets,
+    n_distractors,
     adjusted = FALSE
     )
 
@@ -472,11 +522,6 @@ analyze_nback_subject <- function(subject_path)
       {
         this_condition_rest_time_eprime = as.numeric(stimulus_onset_times[this_condition_last_stim_index]) + 1000
       }
-
-      # reset the time correction every 8 conditions (this makes up a run)
-      # if (length(condition_onset)%%8 == 0 & length(condition_onset) >= 8){
-      #   first_condition_onset_time_eprime <- vector()
-      # }
 
       if (length(first_condition_onset_time_eprime) == 0){
         first_condition_onset_time_eprime = this_condition_onset_time_eprime
@@ -565,6 +610,21 @@ analyze_nback_subject <- function(subject_path)
   ggplot(results_dataframe, aes(fill = factor(ISI), x = factor(nback_level), y=number_of_false_fires)) + geom_bar(position = "dodge", stat = "identity") + # + stat_count(width = 0.5, fill="blue") + #geom_bar(position = "dodge", stat="bin") +
     ggtitle("False Fire Rate") +
     scale_y_continuous(name = "Number of False Fires") +
+    scale_x_discrete(name = "Nback Level") +
+    theme(plot.title = element_text(hjust = 0.5, size = 14, family = "Tahoma", face = "bold"),
+          text = element_text(size = 12, family = "Tahoma"),
+          axis.title = element_text(face="bold"),
+          axis.text.x=element_text(size = 11),
+          legend.position = "bottom") +
+    scale_fill_manual(values=c("orange","blue")) +
+    labs(fill = "ISI")
+  ggsave(file)
+
+  falsefire_file_name_tiff = paste0("dprime",toString(subject_id),".tiff")
+  file = file.path(subject_path,"Figures",falsefire_file_name_tiff)
+  ggplot(results_dataframe, aes(fill = factor(ISI), x = factor(nback_level), y=dprime)) + geom_bar(position = "dodge", stat = "identity") + # + stat_count(width = 0.5, fill="blue") + #geom_bar(position = "dodge", stat="bin") +
+    ggtitle("Sensitivity Analysis") +
+    scale_y_continuous(name = "Z value (hit rate - false alarm)") +
     scale_x_discrete(name = "Nback Level") +
     theme(plot.title = element_text(hjust = 0.5, size = 14, family = "Tahoma", face = "bold"),
           text = element_text(size = 12, family = "Tahoma"),
