@@ -9,10 +9,6 @@ analyze_nback_subject <- function(subject_path)
   library(psycho)
   library(readr)
 
-  # TO DO
-  # 1) add deprime variable and plot/save something
-  # 2) convert outlier removal to 2std away from median
-
 
   subject_path_string_split = strsplit(subject_path,"/")[1][1]
   subject_id = vapply(subject_path_string_split, tail, "", 1)
@@ -321,33 +317,9 @@ analyze_nback_subject <- function(subject_path)
   # create data frames
   responsetime_dataframe = data.frame(nback_level_correct, subject_response_onset_correct,interstimulus_interval_correct, subject_id)
 
-  # mad_responsetime_dataframe <- aggregate(responsetime_dataframe$subject_response_onset_correct,
-  #                                         by = list(nback_level = responsetime_dataframe$nback_level_correct, ISI = responsetime_dataframe$interstimulus_interval_correct, subject_id = responsetime_dataframe$subject_id),
-  #                                         function(x) c(mad_value = 3.5 * median(abs(x - median(x)))))
-  # colnames(mad_responsetime_dataframe) <- c("nback_level", "ISI", "subject_id", "mad_value")
-  # mad_responsetime_dataframe <- mad_responsetime_dataframe[,c(1,2,4,3)]
-  # mad_responsetime_dataframe <- mad_responsetime_dataframe[order(-as.numeric(mad_responsetime_dataframe$ISI)),]
-  #
-  # median_responsetime_dataframe <- aggregate(responsetime_dataframe$subject_response_onset_correct,
-  #                                            by = list(nback_level = responsetime_dataframe$nback_level_correct, ISI = responsetime_dataframe$interstimulus_interval_correct, subject_id = responsetime_dataframe$subject_id),
-  #                                            FUN=median)
-  # colnames(median_responsetime_dataframe) <- c("nback_level", "ISI", "subject_id", "median_response_time")
-  # median_responsetime_dataframe <- median_responsetime_dataframe[,c(1,2,4,3)]
-  # median_responsetime_dataframe <- median_responsetime_dataframe[order(-as.numeric(median_responsetime_dataframe$ISI)),]
-  #
-  # for (this_index in 1:nrow(mad_responsetime_dataframe))
-  # {
-  #   this_cond_mad_frame = mad_responsetime_dataframe[4,]
-  #   this_cond_median_frame = median_responsetime_dataframe[4,]
-  #   this_cond_responsetime_dataframe_indices = which(responsetime_dataframe$nback_level_correct == this_cond_mad_frame$nback_level & responsetime_dataframe$interstimulus_interval_correct == this_cond_mad_frame$ISI)
-  #
-  #   this_cond_outlier_indices = which((abs(responsetime_dataframe$subject_response_onset_correct[this_cond_responsetime_dataframe_indices]-this_cond_median_frame$median_response_time)) > this_cond_mad_frame$mad_value)
-  # }
+  #  -----------------------------------------------------------------------------------------------------------------------
+  # outlier removal options
 
-
-
-
-#####################################################################################################
   # mad_responsetime_dataframe <- aggregate(responsetime_dataframe$subject_response_onset_correct,
   #                                         by = list(subject_id = responsetime_dataframe$subject_id),
   #                                         function(x) c(mad_value = 8 * median(abs(x - median(x)))))
@@ -357,8 +329,11 @@ analyze_nback_subject <- function(subject_path)
 
   outlier_correct_indices = which(responsetime_dataframe$subject_response_onset_correct > 1000 | responsetime_dataframe$subject_response_onset_correct < 100)
 
-
-  responsetime_dataframe = responsetime_dataframe[-outlier_correct_indices,]
+  if (any(outlier_correct_indices)){
+    responsetime_dataframe = responsetime_dataframe[-outlier_correct_indices,]
+  } else{
+    responsetime_dataframe = responsetime_dataframe
+  }
 
   false_fires_index = append(false_fires_index,outlier_correct_indices)
   false_fires_index = sort(false_fires_index)
@@ -367,13 +342,9 @@ analyze_nback_subject <- function(subject_path)
 
   subject_response_and_expected[results_indices] = 0
 
+  #  -----------------------------------------------------------------------------------------------------------------------
 
 
-  #####################################################################################################
-
-
-
-  # vv need to remove outliers before this step vv
   # calculate median again
   median_responsetime_dataframe <- aggregate(responsetime_dataframe$subject_response_onset_correct,
                                              by = list(nback_level = responsetime_dataframe$nback_level_correct, ISI = responsetime_dataframe$interstimulus_interval_correct, subject_id = responsetime_dataframe$subject_id),
@@ -490,7 +461,6 @@ analyze_nback_subject <- function(subject_path)
   results_dataframe$aprime <- round(sensitivity_dataframe$aprime, digits = 2)
   results_dataframe$bppd <- round(sensitivity_dataframe$bppd, digits = 2)
   results_dataframe$c <- round(sensitivity_dataframe$c, digits = 2)
-
   #  -----------------------------------------------------------------------------------------------------------------------
   # # create condition onset arrays # #
 
@@ -594,6 +564,9 @@ analyze_nback_subject <- function(subject_path)
   file = file.path(subject_path,"Figures",responsetime_file_name_tiff)
   ggplot(responsetime_dataframe, aes(fill = interstimulus_interval_correct, x = factor(nback_level_correct), y = subject_response_onset_correct)) + stat_boxplot(geom ='errorbar') + geom_boxplot(alpha=0.7) + scale_x_discrete(name = "nback_level_correct") +
     geom_point(aes(fill = interstimulus_interval_correct), size = 3, shape = 21, position = position_jitterdodge()) +
+    scale_y_continuous(name = "Response Time (ms)",
+                       breaks = seq(0, 1000, 100),
+                       limits=c(0, 1000)) +
     scale_x_discrete(name = "Nback Level") +
     ggtitle("Subject Reaction Time") +
     theme(plot.title = element_text(hjust = 0.5, size = 14, family = "Tahoma", face = "bold"),
@@ -620,8 +593,8 @@ analyze_nback_subject <- function(subject_path)
     labs(fill = "ISI")
   ggsave(file)
 
-  falsefire_file_name_tiff = paste0("dprime",toString(subject_id),".tiff")
-  file = file.path(subject_path,"Figures",falsefire_file_name_tiff)
+  dprime_file_name_tiff = paste0("dprime",toString(subject_id),".tiff")
+  file = file.path(subject_path,"Figures",dprime_file_name_tiff)
   ggplot(results_dataframe, aes(fill = factor(ISI), x = factor(nback_level), y=dprime)) + geom_bar(position = "dodge", stat = "identity") + # + stat_count(width = 0.5, fill="blue") + #geom_bar(position = "dodge", stat="bin") +
     ggtitle("Sensitivity Analysis") +
     scale_y_continuous(name = "Z value (hit rate - false alarm)") +
