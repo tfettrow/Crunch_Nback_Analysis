@@ -120,7 +120,7 @@ analyze_nback_group <- function(group_name, subject_paths)
     geom_errorbar(aes(ymin=lower, ymax=upper), width=.2, position = position_dodge(width = 0.9)) +
     scale_y_continuous(name = "Accuracy (%)",
                        breaks = seq(0, 100, 10),
-                       limits=c(0, 100)) +
+                       limits=c(0, 130)) +
     scale_x_discrete(name = "Nback Level") +
     ggtitle(paste(toString(group_name),"Group Accuracy")) +
     theme(plot.title = element_text(hjust = 0.5, size = 14, family = "Tahoma", face = "bold"),
