@@ -127,7 +127,11 @@ analyze_nback_group <- function(group_name, subject_paths)
           text = element_text(size = 12, family = "Tahoma"),
           axis.title = element_text(face="bold"),
           axis.text.x=element_text(size = 11),
-          legend.position = "bottom") +
+          legend.position = "bottom",
+          panel.border = element_blank(),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          axis.line = element_line(colour = "black")) +
     scale_fill_manual(values=c("orange","blue")) +
     labs(fill = "ISI")
   ggsave(file)
@@ -146,13 +150,17 @@ analyze_nback_group <- function(group_name, subject_paths)
           text = element_text(size = 12, family = "Tahoma"),
           axis.title = element_text(face="bold"),
           axis.text.x=element_text(size = 11),
-          legend.position = "bottom") +
+          legend.position = "bottom",
+          panel.border = element_blank(),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          axis.line = element_line(colour = "black")) +
     scale_fill_manual(values=c("orange","blue")) +
     labs(fill = "ISI")
   ggsave(file)
 
   falsefire_file_name_tiff = paste0(toString(group_name), "_FalseFires",".tiff")
-  file = file.path(subject_path,"Figures",falsefire_file_name_tiff)
+  file = file.path("Group_Results/Figures",falsefire_file_name_tiff)
   ggplot(all_falsefires_data_averaged, aes(fill = factor(ISI), x = factor(nback_level), y=averaged_number_of_false_fires)) + geom_bar(position = "dodge", stat = "identity") + # + stat_count(width = 0.5, fill="blue") + #geom_bar(position = "dodge", stat="bin") +
     geom_errorbar(aes(ymin=lower, ymax=upper), width=.2, position = position_dodge(width = 0.9)) +
     ggtitle(paste(toString(group_name), "Group False Fire Rate")) +
@@ -162,13 +170,17 @@ analyze_nback_group <- function(group_name, subject_paths)
           text = element_text(size = 12, family = "Tahoma"),
           axis.title = element_text(face="bold"),
           axis.text.x=element_text(size = 11),
-          legend.position = "bottom") +
+          legend.position = "bottom",
+          panel.border = element_blank(),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          axis.line = element_line(colour = "black")) +
     scale_fill_manual(values=c("orange","blue")) +
     labs(fill = "ISI")
   ggsave(file)
 
   dprime_file_name_tiff = paste0(toString(group_name), "_dprime",".tiff")
-  file = file.path(subject_path,"Figures",dprime_file_name_tiff)
+  file = file.path("Group_Results/Figures",dprime_file_name_tiff)
   ggplot(all_dprime_data_averaged, aes(fill = factor(ISI), x = factor(nback_level), y=averaged_dprime)) + geom_bar(position = "dodge", stat = "identity") + # + stat_count(width = 0.5, fill="blue") + #geom_bar(position = "dodge", stat="bin") +
     geom_errorbar(aes(ymin=lower, ymax=upper), width=.2, position = position_dodge(width = 0.9)) +
     ggtitle(paste(toString(group_name), "Group Sensitivity Analysis")) +
@@ -178,7 +190,11 @@ analyze_nback_group <- function(group_name, subject_paths)
           text = element_text(size = 12, family = "Tahoma"),
           axis.title = element_text(face="bold"),
           axis.text.x=element_text(size = 11),
-          legend.position = "bottom") +
+          legend.position = "bottom",
+          panel.border = element_blank(),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          axis.line = element_line(colour = "black")) +
     scale_fill_manual(values=c("orange","blue")) +
     labs(fill = "ISI")
   ggsave(file)

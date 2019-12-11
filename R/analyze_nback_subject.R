@@ -555,7 +555,11 @@ analyze_nback_subject <- function(subject_path)
         text = element_text(size = 12, family = "Tahoma"),
         axis.title = element_text(face="bold"),
         axis.text.x=element_text(size = 11),
-        legend.position = "bottom") +
+        legend.position = "bottom",
+        panel.border = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.line = element_line(colour = "black")) +
     scale_fill_manual(values=c("orange","blue")) +
     labs(fill = "ISI")
   ggsave(file)
@@ -573,7 +577,11 @@ analyze_nback_subject <- function(subject_path)
           text = element_text(size = 12, family = "Tahoma"),
           axis.title = element_text(face="bold"),
           axis.text.x=element_text(size = 11),
-          legend.position = "bottom") +
+          legend.position = "bottom",
+          panel.border = element_blank(),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          axis.line = element_line(colour = "black")) +
     scale_fill_manual(values=c("blue","orange")) +
     labs(fill = "ISI")
   ggsave(file)
@@ -588,7 +596,11 @@ analyze_nback_subject <- function(subject_path)
           text = element_text(size = 12, family = "Tahoma"),
           axis.title = element_text(face="bold"),
           axis.text.x=element_text(size = 11),
-          legend.position = "bottom") +
+          legend.position = "bottom",
+          panel.border = element_blank(),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          axis.line = element_line(colour = "black")) +
     scale_fill_manual(values=c("orange","blue")) +
     labs(fill = "ISI")
   ggsave(file)
@@ -603,7 +615,11 @@ analyze_nback_subject <- function(subject_path)
           text = element_text(size = 12, family = "Tahoma"),
           axis.title = element_text(face="bold"),
           axis.text.x=element_text(size = 11),
-          legend.position = "bottom") +
+          legend.position = "bottom",
+          panel.border = element_blank(),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          axis.line = element_line(colour = "black")) +
     scale_fill_manual(values=c("orange","blue")) +
     labs(fill = "ISI")
   ggsave(file)

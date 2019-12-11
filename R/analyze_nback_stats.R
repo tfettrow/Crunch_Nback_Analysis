@@ -9,44 +9,34 @@ analyze_nback_stats <- function(group_names)
   library(lme4)
   library(lmerTest)
   library(emmeans)
-  library(multcompView)
 
   all_results_data <- vector()
   group_comparison_name <- vector()
-  setwd("Group_Results/")
 
   for (this_group_path in group_names){
     this_group_path_string_split = strsplit(this_group_path,"/")[1][1]
     this_group_id = vapply(this_group_path_string_split, tail, "", 1)
 
-    #this_group_id = "stats_test"
-    #setwd("..")
-    # Goes into Subject directory to load file
-    #this_variable = paste0(toString(this_group_id),"_accuracy")
-    # (paste0("Processed/Nback_files/accuracy_"), toString(this_subject_id))
-
     this_group_results_data = read.csv(file.path("Nback_files", paste0(toString(this_group_id), "_results.csv")))
-    #this_group_responseTime_data = read.csv(file.path("Nback_files", paste0(toString(this_group_id), "_responseTime.csv")))
     this_group_results_data$group = this_group_id
     all_results_data = rbind(all_results_data, this_group_results_data)  #This data is already fed in as averaged
 
     group_comparison_name = paste0(toString(group_comparison_name), toString(this_group_id), "vs")
-
-
-    # This goes back to Study folder to confirm proper current directory for saving into Group_Results folder
-    #setwd("..")
   }
-  #group_accuracy_data_averaged <- aggregate(this_group_accuracy_data["this_group_accuracy_data"], by=list(accuracy_data$ISI, accuracy_data$nback),FUN=mean)
-
-}
-
-
 
 all_accuracy_data_averaged <- aggregate(all_results_data["percent_correct"], by=list(all_results_data$group, all_results_data$nback_level),FUN=mean)
 colnames(all_accuracy_data_averaged) <- c("group", "nback_level", "averaged_accuracy")
 
 accuracy_std <- aggregate(all_results_data["percent_correct"], by=list(all_results_data$group, all_results_data$nback_level),FUN=sd)
 colnames(accuracy_std) <- c("group", "nback_level", "std")
+
+accuracy_lmer <- lmer(percent_correct ~ as.character(nback_level)*as.character(group) + (1|subject_id), data=all_results_data)  ##obviously not emotion condition
+
+#summary(response_nback)
+#anova(response_nback)
+
+confint(accuracy_lmer)
+
 
 all_accuracy_data_averaged$std <- accuracy_std$std
 all_accuracy_data_averaged$se <- accuracy_std$std
@@ -87,10 +77,8 @@ all_dprime_data_averaged$lower <- all_dprime_data_averaged$averaged_dprime - all
 all_dprime_data_averaged$upper <- all_dprime_data_averaged$averaged_dprime + all_dprime_data_averaged$std
 
 
-
-
-accuracy_file_name_tiff = paste0(toString(group_name), "_Accuracy",".tiff")
-file = file.path("Group_Results/Figures",accuracy_file_name_tiff)
+accuracy_file_name_tiff = paste0("GroupComparison_Accuracy",".tiff")
+file = file.path("Figures", accuracy_file_name_tiff)
 ggplot(data=all_accuracy_data_averaged, aes(fill = factor(group), x = factor(nback_level), y=averaged_accuracy)) + geom_bar(position = "dodge", stat = "identity") +
   geom_errorbar(aes(ymin=lower, ymax=upper), width=.2, position = position_dodge(width = 0.9)) +
   scale_y_continuous(name = "Accuracy (%)",
@@ -102,14 +90,20 @@ ggplot(data=all_accuracy_data_averaged, aes(fill = factor(group), x = factor(nba
         text = element_text(size = 12, family = "Tahoma"),
         axis.title = element_text(face="bold"),
         axis.text.x=element_text(size = 11),
-        legend.position = "bottom") +
-  scale_fill_manual(values=c("orange","blue","purple")) +
+        legend.position = "bottom",
+        panel.border = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.line = element_line(colour = "black")) +
+  scale_fill_manual(values=c("green","purple")) +
   labs(fill = "ISI")
 ggsave(file)
 
+element_blank()
 
-responsetime_file_name_tiff = paste0(toString(group_name), "_ResponseTime",".tiff")
-file = file.path("Group_Results/Figures", responsetime_file_name_tiff)
+
+responsetime_file_name_tiff = paste0("GroupComparison_ResponseTime",".tiff")
+file = file.path("Figures", responsetime_file_name_tiff)
 ggplot(data=all_responseTime_data_averaged, aes(fill = factor(group), x = factor(nback_level), y=averaged_response_time)) + geom_bar(position = "dodge", stat = "identity") +
   geom_errorbar(aes(ymin=lower, ymax=upper), width=.2, position = position_dodge(width = 0.9)) +
   scale_y_continuous(name = "Response Time (ms)",
@@ -121,15 +115,19 @@ ggplot(data=all_responseTime_data_averaged, aes(fill = factor(group), x = factor
         text = element_text(size = 12, family = "Tahoma"),
         axis.title = element_text(face="bold"),
         axis.text.x=element_text(size = 11),
-        legend.position = "bottom") +
-  scale_fill_manual(values=c("orange","blue")) +
+        legend.position = "bottom",
+        panel.border = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.line = element_line(colour = "black")) +
+  scale_fill_manual(values=c("green","purple")) +
   labs(fill = "ISI")
 ggsave(file)
 
 
 
-falsefire_file_name_tiff = paste0(toString(group_name), "_FalseFires",".tiff")
-file = file.path(subject_path,"Figures",falsefire_file_name_tiff)
+falsefire_file_name_tiff = paste0("GroupComparison_FalseFires",".tiff")
+file = file.path("Figures", falsefire_file_name_tiff)
 ggplot(all_falsefires_data_averaged, aes(fill = factor(group), x = factor(nback_level), y=averaged_number_of_false_fires)) + geom_bar(position = "dodge", stat = "identity") + # + stat_count(width = 0.5, fill="blue") + #geom_bar(position = "dodge", stat="bin") +
   geom_errorbar(aes(ymin=lower, ymax=upper), width=.2, position = position_dodge(width = 0.9)) +
   ggtitle("Group Comparison False Fire Rate") +
@@ -139,13 +137,17 @@ ggplot(all_falsefires_data_averaged, aes(fill = factor(group), x = factor(nback_
         text = element_text(size = 12, family = "Tahoma"),
         axis.title = element_text(face="bold"),
         axis.text.x=element_text(size = 11),
-        legend.position = "bottom") +
-  scale_fill_manual(values=c("orange","blue")) +
+        legend.position = "bottom",
+        panel.border = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.line = element_line(colour = "black")) +
+  scale_fill_manual(values=c("green","purple")) +
   labs(fill = "ISI")
 ggsave(file)
 
-dprime_file_name_tiff = paste0(toString(group_name), "_dprime",".tiff")
-file = file.path(subject_path,"Figures",dprime_file_name_tiff)
+dprime_file_name_tiff = paste0("GroupComparison_dprime",".tiff")
+file = file.path("Figures", dprime_file_name_tiff)
 ggplot(all_dprime_data_averaged, aes(fill = factor(group), x = factor(nback_level), y=averaged_dprime)) + geom_bar(position = "dodge", stat = "identity") + # + stat_count(width = 0.5, fill="blue") + #geom_bar(position = "dodge", stat="bin") +
   geom_errorbar(aes(ymin=lower, ymax=upper), width=.2, position = position_dodge(width = 0.9)) +
   ggtitle( "Group Comparison Sensitivity Analysis") +
@@ -155,8 +157,12 @@ ggplot(all_dprime_data_averaged, aes(fill = factor(group), x = factor(nback_leve
         text = element_text(size = 12, family = "Tahoma"),
         axis.title = element_text(face="bold"),
         axis.text.x=element_text(size = 11),
-        legend.position = "bottom") +
-  scale_fill_manual(values=c("orange","blue")) +
+        legend.position = "bottom",
+        panel.border = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.line = element_line(colour = "black")) +
+  scale_fill_manual(values=c("green","purple")) +
   labs(fill = "ISI")
 ggsave(file)
 
@@ -225,3 +231,5 @@ ggsave(file)
 #These are tricky to look at, but they have the information we need
 #Some contrasts compare different treatments at pretest or at posttest
 #These will give us the equivalent of SPSS simple effects tables
+}
+
