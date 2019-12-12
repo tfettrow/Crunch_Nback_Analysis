@@ -362,12 +362,19 @@ analyze_nback_subject <- function(subject_path)
   false_fires_array = array(data=0,length(expected_correct_response))
   false_fires_array[false_fires_index] = 1
 
-  false_fires_dataframe = data.frame(false_fires_array, nback_level, interstimulus_interval, subject_id)
-  total_false_fires_dataframe <- aggregate(false_fires_dataframe$false_fires_array,
+  unexpected_responses = is.na(expected_correct_response)
+  unexpected_repsonses_indices = which(unexpected_responses == TRUE)
+  unexpected_responses[unexpected_repsonses_indices] = 1
+
+  expected_correct_response_padded_numeric
+
+
+  false_fires_dataframe = data.frame(false_fires_array, expected_correct_response_padded_numeric, nback_level, interstimulus_interval, subject_id)
+  total_false_fires_dataframe <- aggregate(cbind(false_fires_dataframe$false_fires_array, false_fires_dataframe$expected_correct_response_padded_numeric),
                                            by = list(false_fires_dataframe$nback_level, false_fires_dataframe$interstimulus_interval,
                                                      false_fires_dataframe$subject_id), FUN=sum)
-  colnames(total_false_fires_dataframe) <- c("nback_level", "ISI", "subject_id", "number_of_false_fires")
-  total_false_fires_dataframe <- total_false_fires_dataframe[,c(1,2,4,3)]
+  colnames(total_false_fires_dataframe) <- c("nback_level", "ISI", "subject_id", "number_of_false_fires", "number_of_expected_responses")
+  total_false_fires_dataframe <- total_false_fires_dataframe[,c(1,2,4,5,3)]
 
   # create all_response indices to remove conditions where subject did not respond at all
   all_response_indices = subject_response_padded
@@ -418,6 +425,7 @@ analyze_nback_subject <- function(subject_path)
   results_dataframe$number_of_expected_rejected = expected_rejected_dataframe$number_of_expected_rejected
 
   results_dataframe$number_of_false_fires = total_false_fires_dataframe$number_of_false_fires
+  results_dataframe$percent_of_false_fires = total_false_fires_dataframe$number_of_false_fires/total_false_fires_dataframe$number_of_expected_responses * 100
 
   # d'prime calculation
 
@@ -588,9 +596,11 @@ analyze_nback_subject <- function(subject_path)
 
   falsefire_file_name_tiff = paste0("FalseFires",toString(subject_id),".tiff")
   file = file.path(subject_path,"Figures",falsefire_file_name_tiff)
-  ggplot(results_dataframe, aes(fill = factor(ISI), x = factor(nback_level), y=number_of_false_fires)) + geom_bar(position = "dodge", stat = "identity") + # + stat_count(width = 0.5, fill="blue") + #geom_bar(position = "dodge", stat="bin") +
+  ggplot(results_dataframe, aes(fill = factor(ISI), x = factor(nback_level), y=percent_of_false_fires)) + geom_bar(position = "dodge", stat = "identity") + # + stat_count(width = 0.5, fill="blue") + #geom_bar(position = "dodge", stat="bin") +
     ggtitle("False Fire Rate") +
-    scale_y_continuous(name = "Number of False Fires") +
+    scale_y_continuous(name = "Percent of False Fires",
+                       breaks = seq(0, 50, 5),
+                       limits=c(0, 50)) +
     scale_x_discrete(name = "Nback Level") +
     theme(plot.title = element_text(hjust = 0.5, size = 14, family = "Tahoma", face = "bold"),
           text = element_text(size = 12, family = "Tahoma"),
