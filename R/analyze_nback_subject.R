@@ -427,24 +427,6 @@ analyze_nback_subject <- function(subject_path)
   results_dataframe$number_of_false_fires = total_false_fires_dataframe$number_of_false_fires
   results_dataframe$percent_of_false_fires = total_false_fires_dataframe$number_of_false_fires/total_false_fires_dataframe$number_of_expected_responses * 100
 
-  # d'prime calculation
-
-  #Arguments
-  #n_hit: Number of hits.   (number_of_correct_responses)
-  #n_fa: Number of false alarms.  (number_of_false_alarms)
-  #n_miss: Number of misses.
-  #n_cr: Number of correct rejections.
-  #n_targets: Number of targets (n_hit + n_miss).
-  #n_distractors: Number of distractors (n_fa + n_cr).
-  #adjusted: Should it use the Hautus (1995) adjustments for extreme values.
-
-  # Adjustment
-  # dprime inf: consider half hits if perfect
-  # ff NaN: half hits
-  # results_dataframe$number_of_correct_responses
-
-  # find the indices where there are perfect hits (16/16) and false fire are 0
-
   n_hit = results_dataframe$number_of_correct_responses
   n_fa = results_dataframe$number_of_false_fires
   n_targets = results_dataframe$number_of_expected_responses
@@ -544,7 +526,159 @@ analyze_nback_subject <- function(subject_path)
   #  -----------------------------------------------------------------------------------------------=
   # # WRITE DATA OF INTEREST TO FILE # #
 
+  # write redcap variables to file #
+  zero_short_index = which(results_dataframe$ISI == 500 & results_dataframe$nback_level==0)
+  zero_long_index = which(results_dataframe$ISI == 1500 & results_dataframe$nback_level==0)
+  one_short_index = which(results_dataframe$ISI == 500 & results_dataframe$nback_level==1)
+  one_long_index = which(results_dataframe$ISI == 1500 & results_dataframe$nback_level==1)
+  two_short_index = which(results_dataframe$ISI == 500 & results_dataframe$nback_level==2)
+  two_long_index = which(results_dataframe$ISI == 1500 & results_dataframe$nback_level==2)
+  three_short_index = which(results_dataframe$ISI == 500 & results_dataframe$nback_level==3)
+  three_long_index = which(results_dataframe$ISI == 1500 & results_dataframe$nback_level==3)
+
+  if ( study_folder == "MiM_Data")
+  {
+    fmri_zero_short_dprime = results_dataframe$dprime[zero_short_index]
+    fmri_zero_long_dprime = results_dataframe$dprime[zero_long_index]
+    fmri_one_short_dprime = results_dataframe$dprime[one_short_index]
+    fmri_one_long_dprime = results_dataframe$dprime[one_long_index]
+    fmri_two_short_dprime = results_dataframe$dprime[two_short_index]
+    fmri_two_long_dprime = results_dataframe$dprime[two_long_index]
+    fmri_three_short_dprime = results_dataframe$dprime[three_short_index]
+    fmri_three_long_dprime = results_dataframe$dprime[three_long_index]
+
+    fmri_zero_short_falsefirerate = results_dataframe$percent_of_false_fires[zero_short_index]
+    fmri_zero_long_falsefirerate = results_dataframe$percent_of_false_fires[zero_long_index]
+    fmri_one_short_falsefirerate = results_dataframe$percent_of_false_fires[one_short_index]
+    fmri_one_long_falsefirerate = results_dataframe$percent_of_false_fires[one_long_index]
+    fmri_two_short_falsefirerate = results_dataframe$percent_of_false_fires[two_short_index]
+    fmri_two_long_falsefirerate = results_dataframe$percent_of_false_fires[two_long_index]
+    fmri_three_short_falsefirerate = results_dataframe$percent_of_false_fires[three_short_index]
+    fmri_three_long_falsefirerate = results_dataframe$percent_of_false_fires[three_long_index]
+
+    fmri_zero_short_accuracy = results_dataframe$percent_correct[zero_short_index]
+    fmri_zero_long_accuracy = results_dataframe$percent_correct[zero_long_index]
+    fmri_one_short_accuracy = results_dataframe$percent_correct[one_short_index]
+    fmri_one_long_accuracy = results_dataframe$percent_correct[one_long_index]
+    fmri_two_short_accuracy = results_dataframe$percent_correct[two_short_index]
+    fmri_two_long_accuracy = results_dataframe$percent_correct[two_long_index]
+    fmri_three_short_accuracy = results_dataframe$percent_correct[three_short_index]
+    fmri_three_long_accuracy = results_dataframe$percent_correct[three_long_index]
+
+    fmri_zero_short_responsetime = results_dataframe$median_response_time[zero_short_index]
+    fmri_zero_long_responsetime = results_dataframe$median_response_time[zero_long_index]
+    fmri_one_short_responsetime = results_dataframe$median_response_time[one_short_index]
+    fmri_one_long_responsetime = results_dataframe$median_response_time[one_long_index]
+    fmri_two_short_responsetime = results_dataframe$median_response_time[two_short_index]
+    fmri_two_long_responsetime = results_dataframe$median_response_time[two_long_index]
+    fmri_three_short_responsetime = results_dataframe$median_response_time[three_short_index]
+    fmri_three_long_responsetime = results_dataframe$median_response_time[three_long_index]
+
+    redcap_dataframe = data.frame(fmri_zero_short_dprime, fmri_zero_long_dprime, fmri_one_short_dprime, fmri_one_long_dprime, fmri_two_short_dprime, fmri_two_long_dprime,
+                                  fmri_three_short_dprime, fmri_three_long_dprime, fmri_zero_short_falsefirerate, fmri_zero_long_falsefirerate,
+                                  fmri_one_short_falsefirerate, fmri_one_long_falsefirerate, fmri_two_short_falsefirerate, fmri_two_long_falsefirerate,
+                                  fmri_three_short_falsefirerate, fmri_three_long_falsefirerate, fmri_zero_short_accuracy, fmri_zero_long_accuracy,
+                                  fmri_one_short_accuracy, fmri_one_long_accuracy, fmri_two_short_accuracy, fmri_two_long_accuracy, fmri_three_short_accuracy,
+                                  fmri_three_long_accuracy, fmri_zero_short_responsetime, fmri_zero_long_responsetime, fmri_one_short_responsetime,
+                                  fmri_one_long_responsetime, fmri_two_short_responsetime, fmri_two_long_responsetime, fmri_three_short_responsetime,
+                                  fmri_three_long_responsetime)
+
+  } else if (study_folder == "fnirs_nback") {
+    fnirs_zero_short_dprime = results_dataframe$dprime[zero_short_index]
+    fnirs_zero_long_dprime = results_dataframe$dprime[zero_long_index]
+    fnirs_one_short_dprime = results_dataframe$dprime[one_short_index]
+    fnirs_one_long_dprime = results_dataframe$dprime[one_long_index]
+    fnirs_two_short_dprime = results_dataframe$dprime[two_short_index]
+    fnirs_two_long_dprime = results_dataframe$dprime[two_long_index]
+    fnirs_three_short_dprime = results_dataframe$dprime[three_short_index]
+    fnirs_three_long_dprime = results_dataframe$dprime[three_long_index]
+
+    fnirs_zero_short_falsefirerate = results_dataframe$percent_of_false_fires[zero_short_index]
+    fnirs_zero_long_falsefirerate = results_dataframe$percent_of_false_fires[zero_long_index]
+    fnirs_one_short_falsefirerate = results_dataframe$percent_of_false_fires[one_short_index]
+    fnirs_one_long_falsefirerate = results_dataframe$percent_of_false_fires[one_long_index]
+    fnirs_two_short_falsefirerate = results_dataframe$percent_of_false_fires[two_short_index]
+    fnirs_two_long_falsefirerate = results_dataframe$percent_of_false_fires[two_long_index]
+    fnirs_three_short_falsefirerate = results_dataframe$percent_of_false_fires[three_short_index]
+    fnirs_three_long_falsefirerate = results_dataframe$percent_of_false_fires[three_long_index]
+
+    fnirs_zero_short_accuracy = results_dataframe$percent_correct[zero_short_index]
+    fnirs_zero_long_accuracy = results_dataframe$percent_correct[zero_long_index]
+    fnirs_one_short_accuracy = results_dataframe$percent_correct[one_short_index]
+    fnirs_one_long_accuracy = results_dataframe$percent_correct[one_long_index]
+    fnirs_two_short_accuracy = results_dataframe$percent_correct[two_short_index]
+    fnirs_two_long_accuracy = results_dataframe$percent_correct[two_long_index]
+    fnirs_three_short_accuracy = results_dataframe$percent_correct[three_short_index]
+    fnirs_three_long_accuracy = results_dataframe$percent_correct[three_long_index]
+
+    fnirs_zero_short_responsetime = results_dataframe$responsetime[zero_short_index]
+    fnirs_zero_long_responsetime = results_dataframe$responsetime[zero_long_index]
+    fnirs_one_short_responsetime = results_dataframe$responsetime[one_short_index]
+    fnirs_one_long_responsetime = results_dataframe$responsetime[one_long_index]
+    fnirs_two_short_responsetime = results_dataframe$responsetime[two_short_index]
+    fnirs_two_long_responsetime = results_dataframe$responsetime[two_long_index]
+    fnirs_three_short_responsetime = results_dataframe$responsetime[three_short_index]
+    fnirs_three_long_responsetime = results_dataframe$responsetime[three_long_index]
+
+    redcap_dataframe = data.frame(fnirs_zero_short_dprime, fnirs_one_short_dprime, fnirs_one_long_dprime, fnirs_two_short_dprime, fnirs_two_long_dprime,
+                                  fnirs_three_short_dprime, fnirs_three_long_dprime, fnirs_zero_short_falsefirerate, fnirs_zero_long_falsefirerate,
+                                  fnirs_one_short_falsefirerate, fnirs_one_long_falsefirerate, fnirs_two_short_falsefirerate, fnirs_two_long_falsefirerate,
+                                  fnirs_three_short_falsefirerate, fnirs_three_long_falsefirerate, fnirs_zero_short_accuracy, fnirs_zero_long_accuracy,
+                                  fnirs_one_short_accuracy, fnirs_one_long_accuracy, fnirs_two_short_accuracy, fnirs_two_long_accuracy, fnirs_three_short_accuracy,
+                                  fnirs_three_long_accuracy, fnirs_zero_short_responsetime, fnirs_zero_long_responsetime, fnirs_one_short_responsetime,
+                                  fnirs_one_long_responsetime, fnirs_two_short_responsetime, fnirs_two_long_responsetime, fnirs_three_short_responsetime,
+                                  fnirs_three_long_responsetime)
+
+  } else if (study_folder == "eeg_nback") {
+      eeg_zero_short_dprime = results_dataframe$dprime[zero_short_index]
+      eeg_zero_long_dprime = results_dataframe$dprime[zero_long_index]
+      eeg_one_short_dprime = results_dataframe$dprime[one_short_index]
+      eeg_one_long_dprime = results_dataframe$dprime[one_long_index]
+      eeg_two_short_dprime = results_dataframe$dprime[two_short_index]
+      eeg_two_long_dprime = results_dataframe$dprime[two_long_index]
+      eeg_three_short_dprime = results_dataframe$dprime[three_short_index]
+      eeg_three_long_dprime = results_dataframe$dprime[three_long_index]
+
+      eeg_zero_short_falsefirerate = results_dataframe$percent_of_false_fires[zero_short_index]
+      eeg_zero_long_falsefirerate = results_dataframe$percent_of_false_fires[zero_long_index]
+      eeg_one_short_falsefirerate = results_dataframe$percent_of_false_fires[one_short_index]
+      eeg_one_long_falsefirerate = results_dataframe$percent_of_false_fires[one_long_index]
+      eeg_two_short_falsefirerate = results_dataframe$percent_of_false_fires[two_short_index]
+      eeg_two_long_falsefirerate = results_dataframe$percent_of_false_fires[two_long_index]
+      eeg_three_short_falsefirerate = results_dataframe$percent_of_false_fires[three_short_index]
+      eeg_three_long_falsefirerate = results_dataframe$percent_of_false_fires[three_long_index]
+
+      eeg_zero_short_accuracy = results_dataframe$percent_correct[zero_short_index]
+      eeg_zero_long_accuracy = results_dataframe$percent_correct[zero_long_index]
+      eeg_one_short_accuracy = results_dataframe$percent_correct[one_short_index]
+      eeg_one_long_accuracy = results_dataframe$percent_correct[one_long_index]
+      eeg_two_short_accuracy = results_dataframe$percent_correct[two_short_index]
+      eeg_two_long_accuracy = results_dataframe$percent_correct[two_long_index]
+      eeg_three_short_accuracy = results_dataframe$percent_correct[three_short_index]
+      eeg_three_long_accuracy = results_dataframe$percent_correct[three_long_index]
+
+      eeg_zero_short_responsetime = results_dataframe$responsetime[zero_short_index]
+      eeg_zero_long_responsetime = results_dataframe$responsetime[zero_long_index]
+      eeg_one_short_responsetime = results_dataframe$responsetime[one_short_index]
+      eeg_one_long_responsetime = results_dataframe$responsetime[one_long_index]
+      eeg_two_short_responsetime = results_dataframe$responsetime[two_short_index]
+      eeg_two_long_responsetime = results_dataframe$responsetime[two_long_index]
+      eeg_three_short_responsetime = results_dataframe$responsetime[three_short_index]
+      eeg_three_long_responsetime = results_dataframe$responsetime[three_long_index]
+
+      redcap_dataframe = data.frame(eeg_zero_short_dprime, eeg_one_short_dprime, eeg_one_long_dprime, eeg_two_short_dprime, eeg_two_long_dprime,
+                                    eeg_three_short_dprime, eeg_three_long_dprime, eeg_zero_short_falsefirerate, eeg_zero_long_falsefirerate,
+                                    eeg_one_short_falsefirerate, eeg_one_long_falsefirerate, eeg_two_short_falsefirerate, eeg_two_long_falsefirerate,
+                                    eeg_three_short_falsefirerate, eeg_three_long_falsefirerate, eeg_zero_short_accuracy, eeg_zero_long_accuracy,
+                                    eeg_one_short_accuracy, eeg_one_long_accuracy, eeg_two_short_accuracy, eeg_two_long_accuracy, eeg_three_short_accuracy,
+                                    eeg_three_long_accuracy, eeg_zero_short_responsetime, eeg_zero_long_responsetime, eeg_one_short_responsetime,
+                                    eeg_one_long_responsetime, eeg_two_short_responsetime, eeg_two_long_responsetime, eeg_three_short_responsetime,
+                                    eeg_three_long_responsetime)
+
+  }
+
   # # Store Data in Processed folder # #
+  write_csv(redcap_dataframe, file.path(subject_path, paste0("Processed/Nback_files/redcap_variables_", toString(subject_id),".csv")))
   write_csv(stimulus_onset_info_dataframe, file.path(subject_path, paste0("Processed/Nback_files/Stimulus_Onsets_", toString(subject_id),".csv")))
   write_csv(results_dataframe, file.path(subject_path, paste0("Processed/Nback_files/results_", toString(subject_id),".csv")))
 
