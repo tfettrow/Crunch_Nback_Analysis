@@ -583,7 +583,8 @@ analyze_nback_subject <- function(subject_path)
                                   fmri_one_long_responsetime, fmri_two_short_responsetime, fmri_two_long_responsetime, fmri_three_short_responsetime,
                                   fmri_three_long_responsetime)
 
-  } else if (study_folder == "fnirs_nback") {
+  }
+  if (study_folder == "fnirs_nback") {
     fnirs_zero_short_dprime = results_dataframe$dprime[zero_short_index]
     fnirs_zero_long_dprime = results_dataframe$dprime[zero_long_index]
     fnirs_one_short_dprime = results_dataframe$dprime[one_short_index]
@@ -611,14 +612,14 @@ analyze_nback_subject <- function(subject_path)
     fnirs_three_short_accuracy = results_dataframe$percent_correct[three_short_index]
     fnirs_three_long_accuracy = results_dataframe$percent_correct[three_long_index]
 
-    fnirs_zero_short_responsetime = results_dataframe$responsetime[zero_short_index]
-    fnirs_zero_long_responsetime = results_dataframe$responsetime[zero_long_index]
-    fnirs_one_short_responsetime = results_dataframe$responsetime[one_short_index]
-    fnirs_one_long_responsetime = results_dataframe$responsetime[one_long_index]
-    fnirs_two_short_responsetime = results_dataframe$responsetime[two_short_index]
-    fnirs_two_long_responsetime = results_dataframe$responsetime[two_long_index]
-    fnirs_three_short_responsetime = results_dataframe$responsetime[three_short_index]
-    fnirs_three_long_responsetime = results_dataframe$responsetime[three_long_index]
+    fnirs_zero_short_responsetime = results_dataframe$median_response_time[zero_short_index]
+    fnirs_zero_long_responsetime = results_dataframe$median_response_time[zero_long_index]
+    fnirs_one_short_responsetime = results_dataframe$median_response_time[one_short_index]
+    fnirs_one_long_responsetime = results_dataframe$median_response_time[one_long_index]
+    fnirs_two_short_responsetime = results_dataframe$median_response_time[two_short_index]
+    fnirs_two_long_responsetime = results_dataframe$median_response_time[two_long_index]
+    fnirs_three_short_responsetime = results_dataframe$median_response_time[three_short_index]
+    fnirs_three_long_responsetime = results_dataframe$median_response_time[three_long_index]
 
     redcap_dataframe = data.frame(fnirs_zero_short_dprime, fnirs_one_short_dprime, fnirs_one_long_dprime, fnirs_two_short_dprime, fnirs_two_long_dprime,
                                   fnirs_three_short_dprime, fnirs_three_long_dprime, fnirs_zero_short_falsefirerate, fnirs_zero_long_falsefirerate,
@@ -629,7 +630,8 @@ analyze_nback_subject <- function(subject_path)
                                   fnirs_one_long_responsetime, fnirs_two_short_responsetime, fnirs_two_long_responsetime, fnirs_three_short_responsetime,
                                   fnirs_three_long_responsetime)
 
-  } else if (study_folder == "eeg_nback") {
+  }
+  if (study_folder == "eeg_nback") {
       eeg_zero_short_dprime = results_dataframe$dprime[zero_short_index]
       eeg_zero_long_dprime = results_dataframe$dprime[zero_long_index]
       eeg_one_short_dprime = results_dataframe$dprime[one_short_index]
@@ -657,14 +659,14 @@ analyze_nback_subject <- function(subject_path)
       eeg_three_short_accuracy = results_dataframe$percent_correct[three_short_index]
       eeg_three_long_accuracy = results_dataframe$percent_correct[three_long_index]
 
-      eeg_zero_short_responsetime = results_dataframe$responsetime[zero_short_index]
-      eeg_zero_long_responsetime = results_dataframe$responsetime[zero_long_index]
-      eeg_one_short_responsetime = results_dataframe$responsetime[one_short_index]
-      eeg_one_long_responsetime = results_dataframe$responsetime[one_long_index]
-      eeg_two_short_responsetime = results_dataframe$responsetime[two_short_index]
-      eeg_two_long_responsetime = results_dataframe$responsetime[two_long_index]
-      eeg_three_short_responsetime = results_dataframe$responsetime[three_short_index]
-      eeg_three_long_responsetime = results_dataframe$responsetime[three_long_index]
+      eeg_zero_short_responsetime = results_dataframe$median_response_time[zero_short_index]
+      eeg_zero_long_responsetime = results_dataframe$median_response_time[zero_long_index]
+      eeg_one_short_responsetime = results_dataframe$median_response_time[one_short_index]
+      eeg_one_long_responsetime = results_dataframe$median_response_time[one_long_index]
+      eeg_two_short_responsetime = results_dataframe$median_response_time[two_short_index]
+      eeg_two_long_responsetime = results_dataframe$median_response_time[two_long_index]
+      eeg_three_short_responsetime = results_dataframe$median_response_time[three_short_index]
+      eeg_three_long_responsetime = results_dataframe$median_response_time[three_long_index]
 
       redcap_dataframe = data.frame(eeg_zero_short_dprime, eeg_one_short_dprime, eeg_one_long_dprime, eeg_two_short_dprime, eeg_two_long_dprime,
                                     eeg_three_short_dprime, eeg_three_long_dprime, eeg_zero_short_falsefirerate, eeg_zero_long_falsefirerate,
