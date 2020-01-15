@@ -30,18 +30,51 @@ colnames(all_accuracy_data_averaged) <- c("group", "nback_level", "averaged_accu
 accuracy_std <- aggregate(all_results_data["percent_correct"], by=list(all_results_data$group, all_results_data$nback_level),FUN=sd)
 colnames(accuracy_std) <- c("group", "nback_level", "std")
 
+
+all_accuracy_data_averaged$std <- accuracy_std$std
+all_accuracy_data_averaged$se <- accuracy_std$std
+all_accuracy_data_averaged$lower_std <- all_accuracy_data_averaged$averaged_accuracy - all_accuracy_data_averaged$std
+all_accuracy_data_averaged$upper_std <- all_accuracy_data_averaged$averaged_accuracy + all_accuracy_data_averaged$std
+
+
 accuracy_lmer <- lmer(percent_correct ~ as.character(nback_level)*as.character(group) + (1|subject_id), data=all_results_data)  ##obviously not emotion condition
 
 #summary(response_nback)
 #anova(response_nback)
 
-confint(accuracy_lmer)
+confidence_intervals = confint(accuracy_lmer)
+str(confidence_intervals)
+
+# old adult nback 0
+confidence_interval_dataframe = data.frame(all_accuracy_data_averaged$group, all_accuracy_data_averaged$nback_level)
+colnames(confidence_interval_dataframe) <- c("group", "nback_level")
+
+lower_ci <- data.frame(confidence_intervals[3,1], all_accuracy_data_averaged$averaged_accuracy[2] + confidence_intervals[7,1], all_accuracy_data_averaged$averaged_accuracy[1] + confidence_intervals[4,1],
+                       all_accuracy_data_averaged$averaged_accuracy[4] + confidence_intervals[7,1] + confidence_intervals[8,1], all_accuracy_data_averaged$averaged_accuracy[1] + confidence_intervals[5,1],
+                       all_accuracy_data_averaged$averaged_accuracy[6] + confidence_intervals[7,1] + confidence_intervals[9,1], all_accuracy_data_averaged$averaged_accuracy[1] + confidence_intervals[6,1],
+                       all_accuracy_data_averaged$averaged_accuracy[8] + confidence_intervals[7,1] + confidence_intervals[10,1]
+          )
+lower_ci = t(lower_ci)
+colnames(lower_ci) <- c("lower_ci")
+
+upper_ci <- data.frame(confidence_intervals[3,2], all_accuracy_data_averaged$averaged_accuracy[2] + confidence_intervals[7,2], all_accuracy_data_averaged$averaged_accuracy[1] + confidence_intervals[4,2],
+                       all_accuracy_data_averaged$averaged_accuracy[4] + confidence_intervals[7,2] + confidence_intervals[8,2], all_accuracy_data_averaged$averaged_accuracy[1] + confidence_intervals[5,2],
+                       all_accuracy_data_averaged$averaged_accuracy[6] + confidence_intervals[7,2] + confidence_intervals[9,2], all_accuracy_data_averaged$averaged_accuracy[1] + confidence_intervals[6,2],
+                       all_accuracy_data_averaged$averaged_accuracy[8] + confidence_intervals[7,2] + confidence_intervals[10,2]
+)
+upper_ci = t(upper_ci)
+colnames(upper_ci) <- c("upper_ci")
 
 
-all_accuracy_data_averaged$std <- accuracy_std$std
-all_accuracy_data_averaged$se <- accuracy_std$std
-all_accuracy_data_averaged$lower <- all_accuracy_data_averaged$averaged_accuracy - all_accuracy_data_averaged$std
-all_accuracy_data_averaged$upper <- all_accuracy_data_averaged$averaged_accuracy + all_accuracy_data_averaged$std
+confidence_interval_dataframe$lower_ci <- lower_ci
+all_accuracy_data_averaged$lower_ci <- lower_ci
+confidence_interval_dataframe$upper_ci <- upper_ci
+all_accuracy_data_averaged$upper_ci <- upper_ci
+
+
+# young adult nback 0
+#confidence_interval_data_frame = rbind(all_accuracy_data_averaged$averaged_accuracy -
+
 
 
 all_responseTime_data_averaged <- aggregate(all_results_data["median_response_time"], by=list(all_results_data$group, all_results_data$nback_level),FUN=mean)
