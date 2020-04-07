@@ -695,37 +695,75 @@ analyze_nback_subject <- function(subject_path)
                      limits=c(0, 100)) +
     scale_x_discrete(name = "Nback Level") +
     ggtitle("Subject Accuracy") +
-    theme(plot.title = element_text(hjust = 0.5, size = 14, family = "Tahoma", face = "bold"),
-        text = element_text(size = 12, family = "Tahoma"),
-        axis.title = element_text(face="bold"),
-        axis.text.x=element_text(size = 11),
+    theme(plot.title = element_text(hjust = 0.5, size = 14, family = "Tahoma", face = "bold", color = "white"),
+        #text = element_text(size = 12, family = "Tahoma"),
+        axis.title = element_text(face="bold", color = "white"),
+        axis.text.x=element_text(size = 11, color = "white"),
+        axis.text.y=element_text(size = 11, color = "white"),
+        axis.ticks = element_line(colour = 'white', size = .5),
         legend.position = "bottom",
+        legend.text = element_text(color = "white"),
+        legend.background = element_rect(fill = "#1e1e1e"),
         panel.border = element_blank(),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
-        axis.line = element_line(colour = "black")) +
+        panel.background = element_rect(fill = "#1e1e1e"),
+        plot.background = element_rect(fill = "#1e1e1e", color = "#1e1e1e"),
+        axis.line = element_line(colour = "white",size=0.1, linetype = "dotted")) +
+    scale_fill_manual(values=c("orange","blue")) +
+    labs(fill = "ISI")
+  ggsave(file)
+
+  accuracy_file_name_tiff = paste0("Accuracy_",toString(subject_id),".tiff")
+  file = file.path(subject_path,"Figures",accuracy_file_name_tiff)
+  ggplot(data=results_dataframe, aes(fill = factor(ISI), x = factor(nback_level), y=percent_correct)) + geom_bar(position = "dodge", stat = "identity") +
+    scale_y_continuous(name = "Accuracy (%)",
+                       breaks = seq(0, 100, 10),
+                       limits=c(0, 100)) +
+    theme(plot.title = element_text(hjust = 0.5, size = 14, family = "Tahoma", face = "bold", color = "white"),
+          #text = element_text(size = 12, family = "Tahoma"),
+          axis.title = element_text(face="bold", color = "white"),
+          axis.text.x=element_text(size = 11, color = "white"),
+          axis.text.y=element_text(size = 11, color = "white"),
+          axis.ticks = element_line(colour = 'white', size = .5),
+          legend.position = "bottom",
+          legend.text = element_text(color = "white"),
+          legend.background = element_rect(fill = "#1e1e1e"),
+          panel.border = element_blank(),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.background = element_rect(fill = "#1e1e1e"),
+          plot.background = element_rect(fill = "#1e1e1e", color = "#1e1e1e"),
+          axis.line = element_line(colour = "white",size=0.1, linetype = "dotted")) +
     scale_fill_manual(values=c("orange","blue")) +
     labs(fill = "ISI")
   ggsave(file)
 
   responsetime_file_name_tiff = paste0("ResponseTime_",toString(subject_id),".tiff")
   file = file.path(subject_path,"Figures",responsetime_file_name_tiff)
-  ggplot(responsetime_dataframe, aes(fill = interstimulus_interval_correct, x = factor(nback_level_correct), y = subject_response_onset_correct)) + stat_boxplot(geom ='errorbar') + geom_boxplot(alpha=0.7) + scale_x_discrete(name = "nback_level_correct") +
+  ggplot(responsetime_dataframe, aes(fill = interstimulus_interval_correct, x = factor(nback_level_correct), y = subject_response_onset_correct)) + stat_boxplot(geom ='errorbar') +
+    geom_boxplot(alpha=.7, color="#808080") + scale_x_discrete(name = "nback_level_correct") +
     geom_point(aes(fill = interstimulus_interval_correct), size = 3, shape = 21, position = position_jitterdodge()) +
     scale_y_continuous(name = "Response Time (ms)",
                        breaks = seq(0, 1000, 100),
                        limits=c(0, 1000)) +
     scale_x_discrete(name = "Nback Level") +
     ggtitle("Subject Reaction Time") +
-    theme(plot.title = element_text(hjust = 0.5, size = 14, family = "Tahoma", face = "bold"),
-          text = element_text(size = 12, family = "Tahoma"),
-          axis.title = element_text(face="bold"),
-          axis.text.x=element_text(size = 11),
+    theme(plot.title = element_text(hjust = 0.5, size = 14, family = "Tahoma", face = "bold", color = "white"),
+          #text = element_text(size = 12, family = "Tahoma"),
+          axis.title = element_text(face="bold", color = "white"),
+          axis.text.x=element_text(size = 11, color = "white"),
+          axis.text.y=element_text(size = 11, color = "white"),
+          axis.ticks = element_line(colour = 'white', size = .5),
           legend.position = "bottom",
+          legend.text = element_text(color = "white"),
+          legend.background = element_rect(fill = "#1e1e1e"),
           panel.border = element_blank(),
           panel.grid.major = element_blank(),
           panel.grid.minor = element_blank(),
-          axis.line = element_line(colour = "black")) +
+          panel.background = element_rect(fill = "#1e1e1e"),
+          plot.background = element_rect(fill = "#1e1e1e", color = "#1e1e1e"),
+          axis.line = element_line(colour = "white",size=0.1, linetype = "dotted"))  +
     scale_fill_manual(values=c("blue","orange")) +
     labs(fill = "ISI")
   ggsave(file)
@@ -738,15 +776,21 @@ analyze_nback_subject <- function(subject_path)
                        breaks = seq(0, 50, 5),
                        limits=c(0, 50)) +
     scale_x_discrete(name = "Nback Level") +
-    theme(plot.title = element_text(hjust = 0.5, size = 14, family = "Tahoma", face = "bold"),
-          text = element_text(size = 12, family = "Tahoma"),
-          axis.title = element_text(face="bold"),
-          axis.text.x=element_text(size = 11),
+    theme(plot.title = element_text(hjust = 0.5, size = 14, family = "Tahoma", face = "bold", color = "white"),
+          #text = element_text(size = 12, family = "Tahoma"),
+          axis.title = element_text(face="bold", color = "white"),
+          axis.text.x=element_text(size = 11, color = "white"),
+          axis.text.y=element_text(size = 11, color = "white"),
+          axis.ticks = element_line(colour = 'white', size = .5),
           legend.position = "bottom",
+          legend.text = element_text(color = "white"),
+          legend.background = element_rect(fill = "#1e1e1e"),
           panel.border = element_blank(),
           panel.grid.major = element_blank(),
           panel.grid.minor = element_blank(),
-          axis.line = element_line(colour = "black")) +
+          panel.background = element_rect(fill = "#1e1e1e"),
+          plot.background = element_rect(fill = "#1e1e1e", color = "#1e1e1e"),
+          axis.line = element_line(colour = "white",size=0.1, linetype = "dotted"))  +
     scale_fill_manual(values=c("orange","blue")) +
     labs(fill = "ISI")
   ggsave(file)
@@ -757,15 +801,21 @@ analyze_nback_subject <- function(subject_path)
     ggtitle("Sensitivity Analysis") +
     scale_y_continuous(name = "Z value (hit rate - false alarm)") +
     scale_x_discrete(name = "Nback Level") +
-    theme(plot.title = element_text(hjust = 0.5, size = 14, family = "Tahoma", face = "bold"),
-          text = element_text(size = 12, family = "Tahoma"),
-          axis.title = element_text(face="bold"),
-          axis.text.x=element_text(size = 11),
+    theme(plot.title = element_text(hjust = 0.5, size = 14, family = "Tahoma", face = "bold", color = "white"),
+          #text = element_text(size = 12, family = "Tahoma"),
+          axis.title = element_text(face="bold", color = "white"),
+          axis.text.x=element_text(size = 11, color = "white"),
+          axis.text.y=element_text(size = 11, color = "white"),
+          axis.ticks = element_line(colour = 'white', size = .5),
           legend.position = "bottom",
+          legend.text = element_text(color = "white"),
+          legend.background = element_rect(fill = "#1e1e1e"),
           panel.border = element_blank(),
           panel.grid.major = element_blank(),
           panel.grid.minor = element_blank(),
-          axis.line = element_line(colour = "black")) +
+          panel.background = element_rect(fill = "#1e1e1e"),
+          plot.background = element_rect(fill = "#1e1e1e", color = "#1e1e1e"),
+          axis.line = element_line(colour = "white",size=0.1, linetype = "dotted"))  +
     scale_fill_manual(values=c("orange","blue")) +
     labs(fill = "ISI")
   ggsave(file)

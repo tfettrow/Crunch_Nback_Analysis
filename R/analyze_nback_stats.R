@@ -113,47 +113,118 @@ all_dprime_data_averaged$upper <- all_dprime_data_averaged$averaged_dprime + all
 accuracy_file_name_tiff = paste0("GroupComparison_Accuracy",".tiff")
 file = file.path("Figures", accuracy_file_name_tiff)
 ggplot(data=all_accuracy_data_averaged, aes(fill = factor(group), x = factor(nback_level), y=averaged_accuracy)) + geom_bar(position = "dodge", stat = "identity") +
-  geom_errorbar(aes(ymin=lower, ymax=upper), width=.2, position = position_dodge(width = 0.9)) +
+  geom_errorbar(aes(ymin=lower_std, ymax=upper_std), width=.2, position = position_dodge(width = 0.9), color = "white")  +
   scale_y_continuous(name = "Accuracy (%)",
                      breaks = seq(0, 100, 10),
                      limits=c(0, 120)) +
   scale_x_discrete(name = "Nback Level") +
   ggtitle("Group Comparison Accuracy") +
-  theme(plot.title = element_text(hjust = 0.5, size = 14, family = "Tahoma", face = "bold"),
-        text = element_text(size = 12, family = "Tahoma"),
-        axis.title = element_text(face="bold"),
-        axis.text.x=element_text(size = 11),
+  theme(plot.title = element_text(hjust = 0.5, size = 14, family = "Tahoma", face = "bold", color = "white"),
+        #text = element_text(size = 12, family = "Tahoma"),
+        axis.title = element_text(face="bold", color = "white"),
+        axis.text.x=element_text(size = 11, color = "white"),
+        axis.text.y=element_text(size = 11, color = "white"),
+        axis.ticks = element_line(colour = 'white', size = .5),
         legend.position = "bottom",
+        legend.text = element_text(color = "white"),
+        legend.background = element_rect(fill = "#1e1e1e"),
+        legend.title =  element_text(color = "white"),
         panel.border = element_blank(),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
-        axis.line = element_line(colour = "black")) +
-  scale_fill_manual(values=c("green","purple")) +
+        panel.background = element_rect(fill = "#1e1e1e"),
+        plot.background = element_rect(fill = "#1e1e1e", color = "#1e1e1e"),
+        axis.line = element_line(colour = "white",size=0.1, linetype = "dotted"))  +
+  scale_fill_manual(values=c("purple","green")) +
   labs(fill = "ISI")
 ggsave(file)
 
-element_blank()
+accuracy_file_name_tiff = paste0("GroupComparison_Accuracy_NoLabels",".tiff")
+file = file.path("Figures", accuracy_file_name_tiff)
+ggplot(data=all_accuracy_data_averaged, aes(fill = factor(group), x = factor(nback_level), y=averaged_accuracy)) + geom_bar(position = "dodge", stat = "identity") +
+  geom_errorbar(aes(ymin=lower_std, ymax=upper_std), width=.2, position = position_dodge(width = 0.9), color = "white")  +
+  scale_y_continuous(name = "Accuracy (%)",
+                     breaks = seq(0, 100, 10),
+                     limits=c(0, 120)) +
+  scale_x_discrete(name = "Nback Level") +
+  ggtitle("Group Comparison Accuracy") +
+  theme(plot.title = element_blank(),
+        #text = element_text(size = 12, family = "Tahoma"),
+        axis.title = element_blank(),
+        axis.text.x=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks = element_line(colour = 'white', size = .5),
+        legend.position = "none",
+        legend.text = element_text(color = "white"),
+        legend.background = element_rect(fill = "#1e1e1e"),
+        legend.title =  element_blank(),
+        panel.border = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect(fill = "#1e1e1e"),
+        plot.background = element_rect(fill = "#1e1e1e", color = "#1e1e1e"),
+        axis.line = element_line(colour = "white",size=0.1, linetype = "dotted"))  +
+  scale_fill_manual(values=c("purple","green")) +
+  labs(fill = "ISI")
+ggsave(file)
 
 
 responsetime_file_name_tiff = paste0("GroupComparison_ResponseTime",".tiff")
 file = file.path("Figures", responsetime_file_name_tiff)
 ggplot(data=all_responseTime_data_averaged, aes(fill = factor(group), x = factor(nback_level), y=averaged_response_time)) + geom_bar(position = "dodge", stat = "identity") +
-  geom_errorbar(aes(ymin=lower, ymax=upper), width=.2, position = position_dodge(width = 0.9)) +
+  geom_errorbar(aes(ymin=lower, ymax=upper), width=.2, position = position_dodge(width = 0.9), color = "white") +
   scale_y_continuous(name = "Response Time (ms)",
                      breaks = seq(0, 1000, 50),
                      limits=c(0, 1000)) +
   scale_x_discrete(name = "Nback Level") +
   ggtitle("Group Comparison Response Time") +
-  theme(plot.title = element_text(hjust = 0.5, size = 14, family = "Tahoma", face = "bold"),
-        text = element_text(size = 12, family = "Tahoma"),
-        axis.title = element_text(face="bold"),
-        axis.text.x=element_text(size = 11),
+  theme(plot.title = element_text(hjust = 0.5, size = 14, family = "Tahoma", face = "bold", color = "white"),
+        #text = element_text(size = 12, family = "Tahoma"),
+        axis.title = element_text(face="bold", color = "white"),
+        axis.text.x=element_text(size = 11, color = "white"),
+        axis.text.y=element_text(size = 11, color = "white"),
+        axis.ticks = element_line(colour = 'white', size = .5),
         legend.position = "bottom",
+        legend.text = element_text(color = "white"),
+        legend.background = element_rect(fill = "#1e1e1e"),
+        legend.title =  element_text(color = "white"),
         panel.border = element_blank(),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
-        axis.line = element_line(colour = "black")) +
-  scale_fill_manual(values=c("green","purple")) +
+        panel.background = element_rect(fill = "#1e1e1e"),
+        plot.background = element_rect(fill = "#1e1e1e", color = "#1e1e1e"),
+        axis.line = element_line(colour = "white",size=0.1, linetype = "dotted"))  +
+  scale_fill_manual(values=c("purple","green")) +
+  labs(fill = "ISI")
+ggsave(file)
+
+
+responsetime_file_name_tiff = paste0("GroupComparison_ResponseTime_NoLabels",".tiff")
+file = file.path("Figures", responsetime_file_name_tiff)
+ggplot(data=all_responseTime_data_averaged, aes(fill = factor(group), x = factor(nback_level), y=averaged_response_time)) + geom_bar(position = "dodge", stat = "identity") +
+  geom_errorbar(aes(ymin=lower, ymax=upper), width=.2, position = position_dodge(width = 0.9), color = "white") +
+  scale_y_continuous(name = "Response Time (ms)",
+                     breaks = seq(0, 1000, 50),
+                     limits=c(0, 1000)) +
+  scale_x_discrete(name = "Nback Level") +
+  ggtitle("Group Comparison Response Time") +
+  theme(plot.title = element_blank(),
+        #text = element_text(size = 12, family = "Tahoma"),
+        axis.title = element_blank(),
+        axis.text.x=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks = element_line(colour = 'white', size = .5),
+        legend.position = "none",
+        legend.text = element_text(color = "white"),
+        legend.background = element_rect(fill = "#1e1e1e"),
+        legend.title =  element_blank(),
+        panel.border = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect(fill = "#1e1e1e"),
+        plot.background = element_rect(fill = "#1e1e1e", color = "#1e1e1e"),
+        axis.line = element_line(colour = "white",size=0.1, linetype = "dotted"))  +
+  scale_fill_manual(values=c("purple","green")) +
   labs(fill = "ISI")
 ggsave(file)
 
@@ -162,43 +233,111 @@ ggsave(file)
 falsefire_file_name_tiff = paste0("GroupComparison_FalseFires",".tiff")
 file = file.path("Figures", falsefire_file_name_tiff)
 ggplot(all_falsefires_data_averaged, aes(fill = factor(group), x = factor(nback_level), y=averaged_number_of_false_fires)) + geom_bar(position = "dodge", stat = "identity") + # + stat_count(width = 0.5, fill="blue") + #geom_bar(position = "dodge", stat="bin") +
-  geom_errorbar(aes(ymin=lower, ymax=upper), width=.2, position = position_dodge(width = 0.9)) +
+  geom_errorbar(aes(ymin=lower, ymax=upper), width=.2, position = position_dodge(width = 0.9), color = "white") +
   ggtitle("Group Comparison False Fire Rate") +
   scale_y_continuous(name = "Number of False Fires") +
   scale_x_discrete(name = "Nback Level") +
-  theme(plot.title = element_text(hjust = 0.5, size = 14, family = "Tahoma", face = "bold"),
-        text = element_text(size = 12, family = "Tahoma"),
-        axis.title = element_text(face="bold"),
-        axis.text.x=element_text(size = 11),
+  theme(plot.title = element_text(hjust = 0.5, size = 14, family = "Tahoma", face = "bold", color = "white"),
+        #text = element_text(size = 12, family = "Tahoma"),
+        axis.title = element_text(face="bold", color = "white"),
+        axis.text.x=element_text(size = 11, color = "white"),
+        axis.text.y=element_text(size = 11, color = "white"),
+        axis.ticks = element_line(colour = 'white', size = .5),
         legend.position = "bottom",
+        legend.text = element_text(color = "white"),
+        legend.background = element_rect(fill = "#1e1e1e"),
+        legend.title =  element_text(color = "white"),
         panel.border = element_blank(),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
-        axis.line = element_line(colour = "black")) +
-  scale_fill_manual(values=c("green","purple")) +
+        panel.background = element_rect(fill = "#1e1e1e"),
+        plot.background = element_rect(fill = "#1e1e1e", color = "#1e1e1e"),
+        axis.line = element_line(colour = "white",size=0.1, linetype = "dotted"))  +
+  scale_fill_manual(values=c("purple","green")) +
+  labs(fill = "ISI")
+ggsave(file)
+
+falsefire_file_name_tiff = paste0("GroupComparison_FalseFires_NoLabels",".tiff")
+file = file.path("Figures", falsefire_file_name_tiff)
+ggplot(all_falsefires_data_averaged, aes(fill = factor(group), x = factor(nback_level), y=averaged_number_of_false_fires)) + geom_bar(position = "dodge", stat = "identity") + # + stat_count(width = 0.5, fill="blue") + #geom_bar(position = "dodge", stat="bin") +
+  geom_errorbar(aes(ymin=lower, ymax=upper), width=.2, position = position_dodge(width = 0.9), color = "white") +
+  ggtitle("Group Comparison False Fire Rate") +
+  scale_y_continuous(name = "Number of False Fires") +
+  scale_x_discrete(name = "Nback Level") +
+  theme(plot.title = element_blank(),
+        #text = element_text(size = 12, family = "Tahoma"),
+        axis.title = element_blank(),
+        axis.text.x=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks = element_line(colour = 'white', size = .5),
+        legend.position = "none",
+        legend.text = element_text(color = "white"),
+        legend.background = element_rect(fill = "#1e1e1e"),
+        legend.title =  element_blank(),
+        panel.border = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect(fill = "#1e1e1e"),
+        plot.background = element_rect(fill = "#1e1e1e", color = "#1e1e1e"),
+        axis.line = element_line(colour = "white",size=0.1, linetype = "dotted"))  +
+  scale_fill_manual(values=c("purple","green")) +
   labs(fill = "ISI")
 ggsave(file)
 
 dprime_file_name_tiff = paste0("GroupComparison_dprime",".tiff")
 file = file.path("Figures", dprime_file_name_tiff)
 ggplot(all_dprime_data_averaged, aes(fill = factor(group), x = factor(nback_level), y=averaged_dprime)) + geom_bar(position = "dodge", stat = "identity") + # + stat_count(width = 0.5, fill="blue") + #geom_bar(position = "dodge", stat="bin") +
-  geom_errorbar(aes(ymin=lower, ymax=upper), width=.2, position = position_dodge(width = 0.9)) +
+  geom_errorbar(aes(ymin=lower, ymax=upper), width=.2, position = position_dodge(width = 0.9), color = "white") +
   ggtitle( "Group Comparison Sensitivity Analysis") +
   scale_y_continuous(name = "Z value (hit rate - false alarm)") +
   scale_x_discrete(name = "Nback Level") +
-  theme(plot.title = element_text(hjust = 0.5, size = 14, family = "Tahoma", face = "bold"),
-        text = element_text(size = 12, family = "Tahoma"),
-        axis.title = element_text(face="bold"),
-        axis.text.x=element_text(size = 11),
+  theme(plot.title = element_text(hjust = 0.5, size = 14, family = "Tahoma", face = "bold", color = "white"),
+        #text = element_text(size = 12, family = "Tahoma"),
+        axis.title = element_text(face="bold", color = "white"),
+        axis.text.x=element_text(size = 11, color = "white"),
+        axis.text.y=element_text(size = 11, color = "white"),
+        axis.ticks = element_line(colour = 'white', size = .5),
         legend.position = "bottom",
+        legend.text = element_text(color = "white"),
+        legend.background = element_rect(fill = "#1e1e1e"),
+        legend.title =  element_text(color = "white"),
         panel.border = element_blank(),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
-        axis.line = element_line(colour = "black")) +
-  scale_fill_manual(values=c("green","purple")) +
+        panel.background = element_rect(fill = "#1e1e1e"),
+        plot.background = element_rect(fill = "#1e1e1e", color = "#1e1e1e"),
+        axis.line = element_line(colour = "white",size=0.1, linetype = "dotted")) +
+  scale_fill_manual(values=c("purple","green")) +
   labs(fill = "ISI")
 ggsave(file)
 
+
+dprime_file_name_tiff = paste0("GroupComparison_dprime_NoLabels",".tiff")
+file = file.path("Figures", dprime_file_name_tiff)
+ggplot(all_dprime_data_averaged, aes(fill = factor(group), x = factor(nback_level), y=averaged_dprime)) + geom_bar(position = "dodge", stat = "identity") + # + stat_count(width = 0.5, fill="blue") + #geom_bar(position = "dodge", stat="bin") +
+  geom_errorbar(aes(ymin=lower, ymax=upper), width=.2, position = position_dodge(width = 0.9), color = "white") +
+  ggtitle( "Group Comparison Sensitivity Analysis") +
+  scale_y_continuous(name = "Z value (hit rate - false alarm)") +
+  scale_x_discrete(name = "Nback Level") +
+  theme(plot.title = element_blank(),
+        #text = element_text(size = 12, family = "Tahoma"),
+        axis.title = element_blank(),
+        axis.text.x=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks = element_line(colour = 'white', size = .5),
+        legend.position = "none",
+        legend.text = element_text(color = "white"),
+        legend.background = element_rect(fill = "#1e1e1e"),
+        legend.title = element_blank(),
+        panel.border = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect(fill = "#1e1e1e"),
+        plot.background = element_rect(fill = "#1e1e1e", color = "#1e1e1e"),
+        axis.line = element_line(colour = "white",size=0.1, linetype = "dotted")) +
+  scale_fill_manual(values=c("purple","green")) +
+  labs(fill = "ISI")
+ggsave(file)
 
 #response_nback <- lmer(subject_response_onset_correct ~ as.character(nback_level_correct)*as.character(interstimulus_interval_correct ) + (1|subject_id), data=this_group_response_data)  ##obviously not emotion condition
 
