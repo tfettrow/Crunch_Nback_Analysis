@@ -1,4 +1,4 @@
-analyze_nback_subject <- function(subject_id)
+analyze_nback_modalities <- function(subject_id)
 {
   library(ggplot2)
 
