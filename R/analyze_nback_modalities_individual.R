@@ -1,7 +1,6 @@
 analyze_nback_modalities <- function(subject_id)
 {
   library(ggplot2)
-
   #subject_id = 2012
 
   all_results_data <- vector()
