@@ -69,7 +69,7 @@ analyze_nback_modalities_group <- function(subject_ids)
   all_responsetime_data_averaged <- aggregate(all_results_data["median_response_time"], by=list(all_results_data$modality, all_results_data$nback_level, all_results_data$ISI),FUN=mean,na.rm=T)
   colnames(all_responsetime_data_averaged) <- c("modality", "nback_level", "ISI", "median_response_time")
 
-  responsetime_std <- aggregate(all_results_data["median_response_time"], by=list(all_results_data$modality, all_results_data$nback_level, all_results_data$ISI),FUN=sd)
+  responsetime_std <- aggregate(all_results_data["median_response_time"], by=list(all_results_data$modality, all_results_data$nback_level, all_results_data$ISI),FUN=sd,na.rm=T)
   colnames(responsetime_std) <- c("ISI", "nback_level", "ISI", "std")
 
   all_responsetime_data_averaged$std <- responsetime_std$std
