@@ -89,6 +89,7 @@ analyze_nback_modalities_group <- function(subject_ids)
 
 
   accuracy_file_name_tiff = paste0("AvgModalityComparison_Accuracy",".tiff")
+  file = file.path("Comparison_Figures",accuracy_file_name_tiff)
   ggplot(data=all_percent_data_averaged, aes(fill = factor(modality), x = factor(nback_level), y=percent_correct)) + geom_bar(position = "dodge", stat = "identity") +
     geom_errorbar(aes(ymin=lower, ymax=upper), width=.2, position = position_dodge(width = 0.9), color = "white") +
     ggtitle("Group Average Nback vs Accuracy (Modalities)") +
@@ -114,6 +115,7 @@ analyze_nback_modalities_group <- function(subject_ids)
   ggsave(file)
 
   responsetime_file_name_tiff = paste0("AvgModalityComparison_ResponseTime",".tiff")
+  file = file.path("Comparison_Figures",responsetime_file_name_tiff)
   ggplot(data=all_responsetime_data_averaged, aes(fill = factor(modality), x = factor(nback_level), y=median_response_time)) + geom_bar(position = "dodge", stat = "identity") +
     geom_errorbar(aes(ymin=lower, ymax=upper), width=.2, position = position_dodge(width = 0.9), color = "white") +
     ggtitle("Group Average Nback vs Response Time (Modalities)") +
