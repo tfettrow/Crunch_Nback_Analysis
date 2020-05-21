@@ -621,7 +621,7 @@ analyze_nback_subject <- function(subject_path)
     fnirs_three_short_responsetime = results_dataframe$median_response_time[three_short_index]
     fnirs_three_long_responsetime = results_dataframe$median_response_time[three_long_index]
 
-    redcap_dataframe = data.frame(fnirs_zero_short_dprime, fnirs_one_short_dprime, fnirs_one_long_dprime, fnirs_two_short_dprime, fnirs_two_long_dprime,
+    redcap_dataframe = data.frame(fnirs_zero_short_dprime, fnirs_zero_long_dprime, fnirs_one_short_dprime, fnirs_one_long_dprime, fnirs_two_short_dprime, fnirs_two_long_dprime,
                                   fnirs_three_short_dprime, fnirs_three_long_dprime, fnirs_zero_short_falsefirerate, fnirs_zero_long_falsefirerate,
                                   fnirs_one_short_falsefirerate, fnirs_one_long_falsefirerate, fnirs_two_short_falsefirerate, fnirs_two_long_falsefirerate,
                                   fnirs_three_short_falsefirerate, fnirs_three_long_falsefirerate, fnirs_zero_short_accuracy, fnirs_zero_long_accuracy,
@@ -668,7 +668,7 @@ analyze_nback_subject <- function(subject_path)
       eeg_three_short_responsetime = results_dataframe$median_response_time[three_short_index]
       eeg_three_long_responsetime = results_dataframe$median_response_time[three_long_index]
 
-      redcap_dataframe = data.frame(eeg_zero_short_dprime, eeg_one_short_dprime, eeg_one_long_dprime, eeg_two_short_dprime, eeg_two_long_dprime,
+      redcap_dataframe = data.frame(eeg_zero_short_dprime, eeg_zero_long_dprime, eeg_one_short_dprime, eeg_one_long_dprime, eeg_two_short_dprime, eeg_two_long_dprime,
                                     eeg_three_short_dprime, eeg_three_long_dprime, eeg_zero_short_falsefirerate, eeg_zero_long_falsefirerate,
                                     eeg_one_short_falsefirerate, eeg_one_long_falsefirerate, eeg_two_short_falsefirerate, eeg_two_long_falsefirerate,
                                     eeg_three_short_falsefirerate, eeg_three_long_falsefirerate, eeg_zero_short_accuracy, eeg_zero_long_accuracy,
