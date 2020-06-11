@@ -26,7 +26,7 @@ analyze_nback_subject <- function(subject_path)
   study_folder = vapply(study_path_split, tail, "", 1)
 
 
-  if ((subject_id == "1012" || subject_id == "1004") && study_folder == "MiM_Data")
+  if ((subject_id == "1012" || subject_id == "1004") && study_folder == "fmri")
     {
       nback_data1 = read_excel(file.path(subject_path,"Raw/Nback_files/nback_results_Trial1.xlsx"), cell_rows(2:450), sheet = 1, col_types = "text")
       if (subject_id == "1004")
@@ -536,7 +536,10 @@ analyze_nback_subject <- function(subject_path)
   three_short_index = which(results_dataframe$ISI == 500 & results_dataframe$nback_level==3)
   three_long_index = which(results_dataframe$ISI == 1500 & results_dataframe$nback_level==3)
 
-  if ( study_folder == "MiM_Data")
+  record_id = paste0("H", toString(subject_id))
+  redcap_event_name = "base_v4_mri_arm_1"
+
+  if ( study_folder == "fmri")
   {
     fmri_zero_short_dprime = results_dataframe$dprime[zero_short_index]
     fmri_zero_long_dprime = results_dataframe$dprime[zero_long_index]
@@ -574,7 +577,7 @@ analyze_nback_subject <- function(subject_path)
     fmri_three_short_responsetime = results_dataframe$median_response_time[three_short_index]
     fmri_three_long_responsetime = results_dataframe$median_response_time[three_long_index]
 
-    redcap_dataframe = data.frame(fmri_zero_short_dprime, fmri_zero_long_dprime, fmri_one_short_dprime, fmri_one_long_dprime, fmri_two_short_dprime, fmri_two_long_dprime,
+    redcap_dataframe = data.frame(record_id, redcap_event_name, fmri_zero_short_dprime, fmri_zero_long_dprime, fmri_one_short_dprime, fmri_one_long_dprime, fmri_two_short_dprime, fmri_two_long_dprime,
                                   fmri_three_short_dprime, fmri_three_long_dprime, fmri_zero_short_falsefirerate, fmri_zero_long_falsefirerate,
                                   fmri_one_short_falsefirerate, fmri_one_long_falsefirerate, fmri_two_short_falsefirerate, fmri_two_long_falsefirerate,
                                   fmri_three_short_falsefirerate, fmri_three_long_falsefirerate, fmri_zero_short_accuracy, fmri_zero_long_accuracy,
@@ -584,7 +587,7 @@ analyze_nback_subject <- function(subject_path)
                                   fmri_three_long_responsetime)
 
   }
-  if (study_folder == "fnirs_nback") {
+  if (study_folder == "fnirs") {
     fnirs_zero_short_dprime = results_dataframe$dprime[zero_short_index]
     fnirs_zero_long_dprime = results_dataframe$dprime[zero_long_index]
     fnirs_one_short_dprime = results_dataframe$dprime[one_short_index]
@@ -621,7 +624,7 @@ analyze_nback_subject <- function(subject_path)
     fnirs_three_short_responsetime = results_dataframe$median_response_time[three_short_index]
     fnirs_three_long_responsetime = results_dataframe$median_response_time[three_long_index]
 
-    redcap_dataframe = data.frame(fnirs_zero_short_dprime, fnirs_zero_long_dprime, fnirs_one_short_dprime, fnirs_one_long_dprime, fnirs_two_short_dprime, fnirs_two_long_dprime,
+    redcap_dataframe = data.frame(record_id, redcap_event_name, fnirs_zero_short_dprime, fnirs_zero_long_dprime, fnirs_one_short_dprime, fnirs_one_long_dprime, fnirs_two_short_dprime, fnirs_two_long_dprime,
                                   fnirs_three_short_dprime, fnirs_three_long_dprime, fnirs_zero_short_falsefirerate, fnirs_zero_long_falsefirerate,
                                   fnirs_one_short_falsefirerate, fnirs_one_long_falsefirerate, fnirs_two_short_falsefirerate, fnirs_two_long_falsefirerate,
                                   fnirs_three_short_falsefirerate, fnirs_three_long_falsefirerate, fnirs_zero_short_accuracy, fnirs_zero_long_accuracy,
@@ -631,7 +634,7 @@ analyze_nback_subject <- function(subject_path)
                                   fnirs_three_long_responsetime)
 
   }
-  if (study_folder == "eeg_nback") {
+  if (study_folder == "eeg") {
       eeg_zero_short_dprime = results_dataframe$dprime[zero_short_index]
       eeg_zero_long_dprime = results_dataframe$dprime[zero_long_index]
       eeg_one_short_dprime = results_dataframe$dprime[one_short_index]
@@ -668,7 +671,7 @@ analyze_nback_subject <- function(subject_path)
       eeg_three_short_responsetime = results_dataframe$median_response_time[three_short_index]
       eeg_three_long_responsetime = results_dataframe$median_response_time[three_long_index]
 
-      redcap_dataframe = data.frame(eeg_zero_short_dprime, eeg_zero_long_dprime, eeg_one_short_dprime, eeg_one_long_dprime, eeg_two_short_dprime, eeg_two_long_dprime,
+      redcap_dataframe = data.frame(record_id, redcap_event_name, eeg_zero_short_dprime, eeg_zero_long_dprime, eeg_one_short_dprime, eeg_one_long_dprime, eeg_two_short_dprime, eeg_two_long_dprime,
                                     eeg_three_short_dprime, eeg_three_long_dprime, eeg_zero_short_falsefirerate, eeg_zero_long_falsefirerate,
                                     eeg_one_short_falsefirerate, eeg_one_long_falsefirerate, eeg_two_short_falsefirerate, eeg_two_long_falsefirerate,
                                     eeg_three_short_falsefirerate, eeg_three_long_falsefirerate, eeg_zero_short_accuracy, eeg_zero_long_accuracy,

@@ -99,6 +99,27 @@ ggplot(data=all_accuracy_data_averaged, aes(fill = factor(group), x = factor(nba
   labs(fill = "ISI")
 ggsave(file)
 
+
+accuracy_file_name_tiff = paste0("GroupComparison_Accuracy_Nolabels",".tiff")
+file = file.path("Figures", accuracy_file_name_tiff)
+ggplot(data=all_accuracy_data_averaged, aes(fill = factor(group), x = factor(nback_level), y=averaged_accuracy)) + geom_bar(position = "dodge", stat = "identity") +
+  geom_errorbar(aes(ymin=lower, ymax=upper), width=.2, position = position_dodge(width = 0.9)) +
+  scale_y_continuous(name = "Accuracy (%)",
+                     breaks = seq(0, 100, 10),
+                     limits=c(0, 120)) +
+  theme(plot.title = element_blank(),
+        text = element_blank(),
+        axis.title = element_blank(),
+        axis.text.x=element_blank(),
+        legend.position = "none",
+        panel.border = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.line = element_line(colour = "black")) +
+  scale_fill_manual(values=c("green","purple")) +
+  labs(fill = "ISI")
+ggsave(file)
+
 element_blank()
 
 

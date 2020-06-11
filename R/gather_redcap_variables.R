@@ -31,8 +31,6 @@ analyze_nback_group <- function(subject_path)
     this_variable_template_index = which(template_data$Variable...Field.Name == this_variable_name)
     template_data[this_variable_template_index,2] <- this_variable_data
   }
-
   write.csv(template_data, file = file.path("Processed/Nback_files/MindInMotion_ImportTemplate.csv"))
-
 }
 
