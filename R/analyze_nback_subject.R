@@ -327,7 +327,7 @@ analyze_nback_subject <- function(subject_path)
   #
   # outlier_correct_indices = which((abs(responsetime_dataframe$subject_response_onset_correct - median(responsetime_dataframe$subject_response_onset_correct)))  > mad_responsetime_dataframe$mad_value)
 
-  outlier_correct_indices = which(responsetime_dataframe$subject_response_onset_correct > 1000 | responsetime_dataframe$subject_response_onset_correct < 100)
+  outlier_correct_indices = which(responsetime_dataframe$subject_response_onset_correct > 1500 | responsetime_dataframe$subject_response_onset_correct < 100)
 
   if (any(outlier_correct_indices)){
     responsetime_dataframe = responsetime_dataframe[-outlier_correct_indices,]
@@ -347,8 +347,7 @@ analyze_nback_subject <- function(subject_path)
 
   # calculate median again
   median_responsetime_dataframe <- aggregate(responsetime_dataframe$subject_response_onset_correct,
-                                             by = list(nback_level = responsetime_dataframe$nback_level_correct, ISI = responsetime_dataframe$interstimulus_interval_correct, subject_id = responsetime_dataframe$subject_id),
-                                             FUN=median, drop=FALSE)
+                                             by = list(nback_level = responsetime_dataframe$nback_level_correct, ISI = responsetime_dataframe$interstimulus_interval_correct, subject_id = responsetime_dataframe$subject_id), FUN=median, drop=FALSE)
   colnames(median_responsetime_dataframe) <- c("nback_level", "ISI", "subject_id", "median_response_time")
   median_responsetime_dataframe <- median_responsetime_dataframe[,c(1,2,4,3)]
   median_responsetime_dataframe <- median_responsetime_dataframe[order(-as.numeric(median_responsetime_dataframe$ISI)),]
