@@ -538,7 +538,7 @@ analyze_nback_subject <- function(subject_path)
   record_id = paste0("H", toString(subject_id))
   redcap_event_name = "base_v4_mri_arm_1"
 
-  if ( study_folder == "fmri")
+  if ( study_folder == "fmri" || study_folder == "MiM_Data")
   {
     fmri_zero_short_dprime = results_dataframe$dprime[zero_short_index]
     fmri_zero_long_dprime = results_dataframe$dprime[zero_long_index]
