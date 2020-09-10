@@ -166,7 +166,6 @@ analyze_nback_subject <- function(subject_path)
 
     subject_response_suspected_late[indices_to_extract_from_LMask2] = subject_response_LMask2[indices_to_extract_from_LMask2]
     subject_response_onset_suspected_late[indices_to_extract_from_LMask2] = subject_response_onset_LMask2[indices_to_extract_from_LMask2]
-
   }
 
   #  -----------------------------------------------------------------------------------------------------------------------
@@ -213,7 +212,7 @@ analyze_nback_subject <- function(subject_path)
 
     subject_accuracy_eprime[indices_to_replace3] = subject_accuracy_eprime3[indices_to_replace3]
     stimulus_onset_times[indices_to_replace3] = stimulus_onset_times3[indices_to_replace3]
-    expected_correct_response[indices_to_replace3] = expected_correct_response2[indices_to_replace3]
+    expected_correct_response[indices_to_replace3] = expected_correct_response3[indices_to_replace3]
     subject_response[indices_to_replace3] = subject_response3[indices_to_replace3]
     subject_response_onset[indices_to_replace3] = subject_response_onset3[indices_to_replace3]
 
