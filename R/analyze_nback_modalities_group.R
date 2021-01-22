@@ -140,29 +140,29 @@ analyze_nback_modalities_group <- function(subject_ids)
     labs(fill = "ISI", color="white")
   ggsave(file)
 
-  # dprime_file_name_tiff = paste0("AvgModalityComparison_dprime",".tiff")
-  # ggplot(data=all_dprime_data_averaged, aes(fill = factor(modality), x = factor(nback_level), y=dprime)) + geom_bar(position = "dodge", stat = "identity") +
-  #   geom_errorbar(aes(ymin=lower, ymax=upper), width=.2, position = position_dodge(width = 0.9), color = "white") +
-  #   ggtitle("Group Average Nback vs dprime (Modalities)") +
-  #   scale_y_continuous(name = "dprime (z-score)") +
-  #   scale_x_discrete(name = "Nback Level") +
-  #   theme(plot.title = element_text(hjust = 0.5, size = 14, family = "Tahoma", face = "bold", color = "white"),
-  #         axis.title = element_text(face="bold", color = "white"),
-  #         axis.text.x=element_text(size = 11, color = "white"),
-  #         axis.text.y=element_text(size = 11, color = "white"),
-  #         axis.ticks = element_line(colour = 'white', size = .5),
-  #         legend.position = "bottom",
-  #         legend.text = element_text(color = "white"),
-  #         legend.background = element_rect(fill = "#1e1e1e"),
-  #         panel.border = element_blank(),
-  #         panel.grid.major = element_blank(),
-  #         panel.grid.minor = element_blank(),
-  #         panel.background = element_rect(fill = "#1e1e1e"),
-  #         plot.background = element_rect(fill = "#1e1e1e", color = "#1e1e1e"),
-  #         axis.line = element_line(colour = "white",size=0.1, linetype = "dotted"))  +
-  #   scale_fill_manual(values=color_cell) +
-  #   facet_grid(. ~ ISI) +
-  #   labs(fill = "ISI", color="white")
-  # ggsave(file)
+  dprime_file_name_tiff = paste0("AvgModalityComparison_dprime",".tiff")
+  ggplot(data=all_dprime_data_averaged, aes(fill = factor(modality), x = factor(nback_level), y=dprime)) + geom_bar(position = "dodge", stat = "identity") +
+    geom_errorbar(aes(ymin=lower, ymax=upper), width=.2, position = position_dodge(width = 0.9), color = "white") +
+    ggtitle("Group Average Nback vs dprime (Modalities)") +
+    scale_y_continuous(name = "dprime (z-score)") +
+    scale_x_discrete(name = "Nback Level") +
+    theme(plot.title = element_text(hjust = 0.5, size = 14, family = "Tahoma", face = "bold", color = "white"),
+          axis.title = element_text(face="bold", color = "white"),
+          axis.text.x=element_text(size = 11, color = "white"),
+          axis.text.y=element_text(size = 11, color = "white"),
+          axis.ticks = element_line(colour = 'white', size = .5),
+          legend.position = "bottom",
+          legend.text = element_text(color = "white"),
+          legend.background = element_rect(fill = "#1e1e1e"),
+          panel.border = element_blank(),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.background = element_rect(fill = "#1e1e1e"),
+          plot.background = element_rect(fill = "#1e1e1e", color = "#1e1e1e"),
+          axis.line = element_line(colour = "white",size=0.1, linetype = "dotted"))  +
+    scale_fill_manual(values=color_cell) +
+    facet_grid(. ~ ISI) +
+    labs(fill = "ISI", color="white")
+  ggsave(file)
 
 }
