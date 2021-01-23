@@ -76,16 +76,16 @@ analyze_nback_modalities_group <- function(subject_ids)
   all_responsetime_data_averaged$lower <- all_responsetime_data_averaged$median_response_time - all_responsetime_data_averaged$std
   all_responsetime_data_averaged$upper <- all_responsetime_data_averaged$median_response_time + all_responsetime_data_averaged$std
 
-#
-#   all_dprime_data_averaged <- aggregate(all_results_data["dprime"], by=list(all_results_data$modality, all_results_data$nback_level, all_results_data$ISI),FUN=mean)
-#   colnames(all_dprime_data_averaged) <- c("modality", "nback_level", "ISI", "dprime")
-#
-#   dprime_std <- aggregate(all_results_data["dprime"], by=list(all_results_data$modality, all_results_data$nback_level, all_results_data$ISI),FUN=sd)
-#   colnames(dprime_std) <- c("ISI", "nback_level", "ISI", "std")
-#
-#   all_dprime_data_averaged$std <- dprime_std$std
-#   all_dprime_data_averaged$lower <- all_dprime_data_averaged$median_response_time - all_dprime_data_averaged$std
-#   all_dprime_data_averaged$upper <- all_dprime_data_averaged$median_response_time + all_dprime_data_averaged$std
+
+  all_dprime_data_averaged <- aggregate(all_results_data["dprime"], by=list(all_results_data$modality, all_results_data$nback_level, all_results_data$ISI),FUN=mean)
+  colnames(all_dprime_data_averaged) <- c("modality", "nback_level", "ISI", "dprime")
+
+  dprime_std <- aggregate(all_results_data["dprime"], by=list(all_results_data$modality, all_results_data$nback_level, all_results_data$ISI),FUN=sd)
+  colnames(dprime_std) <- c("ISI", "nback_level", "ISI", "std")
+
+  all_dprime_data_averaged$std <- dprime_std$std
+  all_dprime_data_averaged$lower <- all_dprime_data_averaged$dprime - all_dprime_data_averaged$std
+  all_dprime_data_averaged$upper <- all_dprime_data_averaged$dprime + all_dprime_data_averaged$std
 
 
   accuracy_file_name_tiff = paste0("AvgModalityComparison_Accuracy",".tiff")
@@ -141,6 +141,7 @@ analyze_nback_modalities_group <- function(subject_ids)
   ggsave(file)
 
   dprime_file_name_tiff = paste0("AvgModalityComparison_dprime",".tiff")
+  file = file.path("Comparison_Figures",dprime_file_name_tiff)
   ggplot(data=all_dprime_data_averaged, aes(fill = factor(modality), x = factor(nback_level), y=dprime)) + geom_bar(position = "dodge", stat = "identity") +
     geom_errorbar(aes(ymin=lower, ymax=upper), width=.2, position = position_dodge(width = 0.9), color = "white") +
     ggtitle("Group Average Nback vs dprime (Modalities)") +
