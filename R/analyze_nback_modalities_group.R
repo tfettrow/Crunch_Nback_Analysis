@@ -66,7 +66,7 @@ analyze_nback_modalities_group <- function(subject_ids)
       dates_completed <- rbind(dates_completed, fmri_date_completed)
     }
     }
-  }
+
 
   dates_completed <- dates_completed %>% arrange(dates_completed$subject,as.character(dates_completed$date))
 
