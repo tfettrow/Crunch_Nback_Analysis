@@ -92,9 +92,9 @@ analyze_nback_modalities_group <- function(subject_ids)
   modality_accuracy_std <- aggregate(all_results_data["percent_correct"], by=list(all_results_data$modality, all_results_data$nback_level, all_results_data$ISI),FUN=sd,na.rm=T) #,FUN = function(x) c(se = std.error(x)))#,FUN=sd)
   colnames(modality_accuracy_std) <- c("modality", "nback_level", "ISI", "std")
 
-  modality_percent_data_averaged$std <- accuracy_std$std
+  modality_percent_data_averaged$std <- modality_accuracy_std$std
   modality_percent_data_averaged$lower <- modality_percent_data_averaged$percent_correct - modality_percent_data_averaged$std
-  modality__percent_data_averaged$upper <- modality__percent_data_averaged$percent_correct + modality__percent_data_averaged$std
+  modality_percent_data_averaged$upper <- modality_percent_data_averaged$percent_correct + modality_percent_data_averaged$std
 
 
 
@@ -255,7 +255,7 @@ analyze_nback_modalities_group <- function(subject_ids)
 
 
   ordered_responsetime_data_averaged <- aggregate(all_results_data["median_response_time"], by=list(all_results_data$order, all_results_data$nback_level, all_results_data$ISI),FUN=mean,na.rm=T)
-  colnames(modality_responsetime_data_averaged) <- c("order", "nback_level", "ISI", "median_response_time")
+  colnames(ordered_responsetime_data_averaged) <- c("order", "nback_level", "ISI", "median_response_time")
 
   ordered_responsetime_std <- aggregate(all_results_data["median_response_time"], by=list(all_results_data$order, all_results_data$nback_level, all_results_data$ISI),FUN = function(x) c(se = std.error(x)))#,FUN=sd,na.rm=T)
   colnames(ordered_responsetime_std) <- c("order", "nback_level", "ISI", "std")
