@@ -535,10 +535,11 @@ analyze_nback_subject <- function(subject_path)
   three_long_index = which(results_dataframe$ISI == 1500 & results_dataframe$nback_level==3)
 
   record_id = paste0("H", toString(subject_id))
-  redcap_event_name = "base_v4_mri_arm_1"
 
   if ( study_folder == "fmri" || study_folder == "MiM_Data")
   {
+    redcap_event_name = "base_v4_mri_arm_1"
+
     fmri_zero_short_dprime = results_dataframe$dprime[zero_short_index]
     fmri_zero_long_dprime = results_dataframe$dprime[zero_long_index]
     fmri_one_short_dprime = results_dataframe$dprime[one_short_index]
@@ -585,7 +586,9 @@ analyze_nback_subject <- function(subject_path)
                                   fmri_three_long_responsetime)
 
   }
-  if (study_folder == "fnirs") {
+  if (study_folder == "fnirs" || study_folder == "fnirs_nback") {
+    redcap_event_name = "base_fnirshpc_harm_arm_1"
+
     fnirs_zero_short_dprime = results_dataframe$dprime[zero_short_index]
     fnirs_zero_long_dprime = results_dataframe$dprime[zero_long_index]
     fnirs_one_short_dprime = results_dataframe$dprime[one_short_index]
@@ -632,7 +635,9 @@ analyze_nback_subject <- function(subject_path)
                                   fnirs_three_long_responsetime)
 
   }
-  if (study_folder == "eeg") {
+  if (study_folder == "eeg" || study_folder == "eeg_nback") {
+      redcap_event_name = "base_eeg_arm_1"
+
       eeg_zero_short_dprime = results_dataframe$dprime[zero_short_index]
       eeg_zero_long_dprime = results_dataframe$dprime[zero_long_index]
       eeg_one_short_dprime = results_dataframe$dprime[one_short_index]
