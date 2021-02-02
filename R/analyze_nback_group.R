@@ -19,8 +19,8 @@ analyze_nback_group <- function(group_name,subject_paths)
     # A not very elegant way of creating folders and then navigating to dir to read
     setwd(this_subject_path)
     setwd("..")
-    dir.create("Group_Results")
-    setwd("Group_Results")
+    dir.create("Nback_Group_Results")
+    setwd("Nback_Group_Results")
     dir.create("Figures")
     dir.create("Nback_files")
     setwd("..")
@@ -33,7 +33,7 @@ analyze_nback_group <- function(group_name,subject_paths)
      setwd("..")
   }
 
-  write.csv(all_results_data, file = file.path("Group_Results/Nback_files", paste0(toString(group_name), "_results",".csv")))
+  write.csv(all_results_data, file = file.path("Nback_Group_Results/Nback_files", paste0(toString(group_name), "_results",".csv")))
 
 
   all_accuracy_data_averaged <- aggregate(all_results_data["percent_correct"], by=list(all_results_data$ISI, all_results_data$nback_level),FUN=mean)
@@ -115,7 +115,7 @@ analyze_nback_group <- function(group_name,subject_paths)
 
   # # PLOT # #
   accuracy_file_name_tiff = paste0(toString(group_name), "_Accuracy",".tiff")
-  file = file.path("Group_Results/Figures",accuracy_file_name_tiff)
+  file = file.path("Nback_Group_Results/Figures",accuracy_file_name_tiff)
   ggplot(data=all_accuracy_data_averaged, aes(fill = factor(ISI), x = factor(nback_level), y=averaged_accuracy)) + geom_bar(position = "dodge", stat = "identity") +
     geom_errorbar(aes(ymin=lower, ymax=upper), width=.2, position = position_dodge(width = 0.9),color = "white") +
     scale_y_continuous(name = "Accuracy (%)",
@@ -144,7 +144,7 @@ analyze_nback_group <- function(group_name,subject_paths)
   ggsave(file)
 
   accuracy_file_name_tiff = paste0(toString(group_name), "_Accuracy_nolabel",".tiff")
-  file = file.path("Group_Results/Figures",accuracy_file_name_tiff)
+  file = file.path("Nback_Group_Results/Figures",accuracy_file_name_tiff)
   ggplot(data=all_accuracy_data_averaged, aes(fill = factor(ISI), x = factor(nback_level), y=averaged_accuracy)) + geom_bar(position = "dodge", stat = "identity") +
     geom_errorbar(aes(ymin=lower, ymax=upper), width=.2, position = position_dodge(width = 0.9),color = "white") +
     scale_y_continuous(name = "Accuracy (%)",
@@ -169,7 +169,7 @@ analyze_nback_group <- function(group_name,subject_paths)
   ggsave(file)
 
   responsetime_file_name_tiff = paste0(toString(group_name), "_ResponseTime",".tiff")
-  file = file.path("Group_Results/Figures", responsetime_file_name_tiff)
+  file = file.path("Nback_Group_Results/Figures", responsetime_file_name_tiff)
   ggplot(data=all_responseTime_data_averaged, aes(fill = factor(ISI), x = factor(nback_level), y=averaged_response_time)) + geom_bar(position = "dodge", stat = "identity") +
     geom_errorbar(aes(ymin=lower, ymax=upper), width=.2, position = position_dodge(width = 0.9), color = "white") +
     scale_y_continuous(name = "Response Time (ms)",
@@ -198,11 +198,12 @@ analyze_nback_group <- function(group_name,subject_paths)
   ggsave(file)
 
   falsefire_file_name_tiff = paste0(toString(group_name), "_FalseFires",".tiff")
-  file = file.path("Group_Results/Figures",falsefire_file_name_tiff)
+  file = file.path("Nback_Group_Results/Figures",falsefire_file_name_tiff)
   ggplot(all_falsefires_data_averaged, aes(fill = factor(ISI), x = factor(nback_level), y=averaged_number_of_false_fires)) + geom_bar(position = "dodge", stat = "identity") + # + stat_count(width = 0.5, fill="blue") + #geom_bar(position = "dodge", stat="bin") +
     geom_errorbar(aes(ymin=lower, ymax=upper), width=.2, position = position_dodge(width = 0.9), color = "white") +
     ggtitle(paste(toString(group_name), "Group False Fire Rate")) +
-    scale_y_continuous(name = "Number of False Fires") +
+    scale_y_continuous(name = "Number of False Fires",
+                       limits=c(0, 10)) +
     scale_x_discrete(name = "Nback Level") +
     theme(plot.title = element_text(hjust = 0.5, size = 14, family = "Tahoma", face = "bold", color = "white"),
           #text = element_text(size = 12, family = "Tahoma"),
@@ -225,11 +226,12 @@ analyze_nback_group <- function(group_name,subject_paths)
   ggsave(file)
 
   dprime_file_name_tiff = paste0(toString(group_name), "_dprime",".tiff")
-  file = file.path("Group_Results/Figures",dprime_file_name_tiff)
+  file = file.path("Nback_Group_Results/Figures",dprime_file_name_tiff)
   ggplot(all_dprime_data_averaged, aes(fill = factor(ISI), x = factor(nback_level), y=averaged_dprime)) + geom_bar(position = "dodge", stat = "identity") + # + stat_count(width = 0.5, fill="blue") + #geom_bar(position = "dodge", stat="bin") +
     geom_errorbar(aes(ymin=lower, ymax=upper), width=.2, position = position_dodge(width = 0.9), color = "white") +
     ggtitle(paste(toString(group_name), "Group Sensitivity Analysis")) +
-    scale_y_continuous(name = "Z value (hit rate - false alarm)") +
+    scale_y_continuous(name = "Z value (hit rate - false alarm)",
+                       limits=c(0, 3)) +
     scale_x_discrete(name = "Nback Level") +
     theme(plot.title = element_text(hjust = 0.5, size = 14, family = "Tahoma", face = "bold", color = "white"),
           #text = element_text(size = 12, family = "Tahoma"),
