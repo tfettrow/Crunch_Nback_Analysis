@@ -805,7 +805,9 @@ analyze_nback_subject <- function(subject_path)
   file = file.path(subject_path,"Figures",dprime_file_name_tiff)
   ggplot(results_dataframe, aes(fill = factor(ISI), x = factor(nback_level), y=dprime)) + geom_bar(position = "dodge", stat = "identity") + # + stat_count(width = 0.5, fill="blue") + #geom_bar(position = "dodge", stat="bin") +
     ggtitle("Sensitivity Analysis") +
-    scale_y_continuous(name = "Z value (hit rate - false alarm)") +
+    scale_y_continuous(name = "Z value (hit rate - false alarm)",
+                       breaks = seq(0, 3, .5),
+                       limits=c(0, 3)) +
     scale_x_discrete(name = "Nback Level") +
     theme(plot.title = element_text(hjust = 0.5, size = 14, family = "Tahoma", face = "bold", color = "white"),
           #text = element_text(size = 12, family = "Tahoma"),
