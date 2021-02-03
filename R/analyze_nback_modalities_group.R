@@ -141,7 +141,9 @@ analyze_nback_modalities_group <- function(subject_ids)
   ggplot(data=modality_percent_data_averaged, aes(fill = factor(modality), x = factor(nback_level), y=percent_correct)) + geom_bar(position = "dodge", stat = "identity") +
     geom_errorbar(aes(ymin=lower, ymax=upper), width=.2, position = position_dodge(width = 0.9), color = "white") +
     ggtitle("Group Average Nback vs Accuracy (Modalities)") +
-    scale_y_continuous(name = "Accuracy (%)") +
+    scale_y_continuous(name = "Accuracy (%)",
+                       breaks = seq(0, 100, 10),
+                       limits=c(0, 100)) +
     scale_x_discrete(name = "Nback Level") +
     theme(plot.title = element_text(hjust = 0.5, size = 14, family = "Tahoma", face = "bold", color = "white"),
           axis.title = element_text(face="bold", color = "white"),
@@ -167,7 +169,9 @@ analyze_nback_modalities_group <- function(subject_ids)
   ggplot(data=modality_responsetime_data_averaged, aes(fill = factor(modality), x = factor(nback_level), y=median_response_time)) + geom_bar(position = "dodge", stat = "identity") +
     geom_errorbar(aes(ymin=lower, ymax=upper), width=.2, position = position_dodge(width = 0.9), color = "white") +
     ggtitle("Group Average Nback vs Response Time (Modalities)") +
-    scale_y_continuous(name = "response time (ms)") +
+    scale_y_continuous(name = "Response Time (ms)",
+                       breaks = seq(0, 1000, 100),
+                       limits=c(0, 1000)) +
     scale_x_discrete(name = "Nback Level") +
     theme(plot.title = element_text(hjust = 0.5, size = 14, family = "Tahoma", face = "bold", color = "white"),
           axis.title = element_text(face="bold", color = "white"),
@@ -193,7 +197,9 @@ analyze_nback_modalities_group <- function(subject_ids)
   ggplot(data=modality_percentFalsefires_data_averaged, aes(fill = factor(modality), x = factor(nback_level), y=percent_of_false_fires)) + geom_bar(position = "dodge", stat = "identity") +
     geom_errorbar(aes(ymin=lower, ymax=upper), width=.2, position = position_dodge(width = 0.9), color = "white") +
     ggtitle("Group Average Nback vs False Fires (Modalities)") +
-    scale_y_continuous(name = "false fires (%)") +
+    scale_y_continuous(name = "Percent of False Fires",
+                       breaks = seq(0, 50, 5),
+                       limits=c(0, 50)) +
     scale_x_discrete(name = "Nback Level") +
     theme(plot.title = element_text(hjust = 0.5, size = 14, family = "Tahoma", face = "bold", color = "white"),
           axis.title = element_text(face="bold", color = "white"),
@@ -219,7 +225,9 @@ analyze_nback_modalities_group <- function(subject_ids)
   ggplot(data=modality_dprime_data_averaged, aes(fill = factor(modality), x = factor(nback_level), y=dprime)) + geom_bar(position = "dodge", stat = "identity") +
     geom_errorbar(aes(ymin=lower, ymax=upper), width=.2, position = position_dodge(width = 0.9), color = "white") +
     ggtitle("Group Average Nback vs dprime (Modalities)") +
-    scale_y_continuous(name = "dprime (z-score)") +
+    scale_y_continuous(name = "dprime (z-score)",
+                       breaks = seq(0, 3, .5),
+                       limits=c(0, 3)) +
     scale_x_discrete(name = "Nback Level") +
     theme(plot.title = element_text(hjust = 0.5, size = 14, family = "Tahoma", face = "bold", color = "white"),
           axis.title = element_text(face="bold", color = "white"),
@@ -296,7 +304,9 @@ analyze_nback_modalities_group <- function(subject_ids)
   ggplot(data=ordered_percent_data_averaged, aes(fill = factor(order), x = factor(nback_level), y=percent_correct)) + geom_bar(position = "dodge", stat = "identity") +
     geom_errorbar(aes(ymin=lower, ymax=upper), width=.2, position = position_dodge(width = 0.9), color = "white") +
     ggtitle("Group Average Nback vs Accuracy (order)") +
-    scale_y_continuous(name = "Accuracy (%)") +
+    scale_y_continuous(name = "Accuracy (%)",
+                       breaks = seq(0, 100, 10),
+                       limits=c(0, 100)) +
     scale_x_discrete(name = "Nback Level") +
     theme(plot.title = element_text(hjust = 0.5, size = 14, family = "Tahoma", face = "bold", color = "white"),
           axis.title = element_text(face="bold", color = "white"),
@@ -322,7 +332,9 @@ analyze_nback_modalities_group <- function(subject_ids)
   ggplot(data=ordered_responsetime_data_averaged, aes(fill = factor(order), x = factor(nback_level), y=median_response_time)) + geom_bar(position = "dodge", stat = "identity") +
     geom_errorbar(aes(ymin=lower, ymax=upper), width=.2, position = position_dodge(width = 0.9), color = "white") +
     ggtitle("Group Average Nback vs Response Time (order)") +
-    scale_y_continuous(name = "response time (ms)") +
+    scale_y_continuous(name = "Response Time (ms)",
+                       breaks = seq(0, 1000, 100),
+                       limits=c(0, 1000)) +
     scale_x_discrete(name = "Nback Level") +
     theme(plot.title = element_text(hjust = 0.5, size = 14, family = "Tahoma", face = "bold", color = "white"),
           axis.title = element_text(face="bold", color = "white"),
@@ -348,7 +360,9 @@ analyze_nback_modalities_group <- function(subject_ids)
   ggplot(data=ordered_percentFalsefires_data_averaged, aes(fill = factor(order), x = factor(nback_level), y=percent_of_false_fires)) + geom_bar(position = "dodge", stat = "identity") +
     geom_errorbar(aes(ymin=lower, ymax=upper), width=.2, position = position_dodge(width = 0.9), color = "white") +
     ggtitle("Group Average Nback vs False Fires (order)") +
-    scale_y_continuous(name = "false fires (%)") +
+    scale_y_continuous(name = "Percent of False Fires",
+                       breaks = seq(0, 50, 5),
+                       limits=c(0, 50)) +
     scale_x_discrete(name = "Nback Level") +
     theme(plot.title = element_text(hjust = 0.5, size = 14, family = "Tahoma", face = "bold", color = "white"),
           axis.title = element_text(face="bold", color = "white"),
@@ -374,7 +388,9 @@ analyze_nback_modalities_group <- function(subject_ids)
   ggplot(data=ordered_dprime_data_averaged, aes(fill = factor(order), x = factor(nback_level), y=dprime)) + geom_bar(position = "dodge", stat = "identity") +
     geom_errorbar(aes(ymin=lower, ymax=upper), width=.2, position = position_dodge(width = 0.9), color = "white") +
     ggtitle("Group Average Nback vs dprime (order)") +
-    scale_y_continuous(name = "dprime (z-score)") +
+    scale_y_continuous(name = "dprime (z-score)",
+                       breaks = seq(0, 3, .5),
+                       limits=c(0, 3)) +
     scale_x_discrete(name = "Nback Level") +
     theme(plot.title = element_text(hjust = 0.5, size = 14, family = "Tahoma", face = "bold", color = "white"),
           axis.title = element_text(face="bold", color = "white"),
