@@ -8,7 +8,7 @@ analyze_nback_subject <- function(subject_path)
   library(dplyr)
   library(psycho)
   library(readr)
-
+#change 1
 
   subject_path_string_split = strsplit(subject_path,"/")[1][1]
   subject_id = vapply(subject_path_string_split, tail, "", 1)
