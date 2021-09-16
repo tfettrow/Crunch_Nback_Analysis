@@ -37,6 +37,7 @@ analyze_nback_subject <- function(subject_path)
       {
         nback_data2 = read_excel(file.path(subject_path,"Raw/Nback_files/nback_results_Trial2.xlsx"), cell_rows(2:226), sheet = 1, col_types = "text")
       }
+
       nback_block_labels = nback_data1$`Running[SubTrial]`
 
       subject_accuracy_eprime = nback_data1$Stimulus.ACC
@@ -688,7 +689,7 @@ analyze_nback_subject <- function(subject_path)
   # # Store Data in Processed folder # #
   write_csv(redcap_dataframe, file.path(subject_path, paste0("Processed/Nback_files/redcap_variables_", toString(subject_id),".csv")))
   write_csv(stimulus_onset_info_dataframe, file.path(subject_path, paste0("Processed/Nback_files/Stimulus_Onsets_", toString(subject_id),".csv")))
-  write_csv(results_dataframe, file.path(subject_path, paste0("Processed/Nback_files/results_", toString(subject_id),".csv")))
+  #write_csv(results_dataframe, file.path(subject_path, paste0("Processed/Nback_files/results_", toString(subject_id),".csv")))
 
   #  -----------------------------------------------------------------------------------------------
 
